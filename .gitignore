@@ -3,10 +3,14 @@ dist/
 .astro/
 .vercel/
 
-# ห้าม commit เด็ดขาด — มี LINE Channel Access Token กับ Resend API key
+# ห้าม commit เด็ดขาด — มี LINE Channel Access Token, รหัสฐานข้อมูล Neon และรหัสเข้าหลังบ้าน
 .env
 .env.*
 !.env.example
 
 .DS_Store
 *.log
+
+# Vercel CLI ต่อท้ายไฟล์นี้เองตอน `vercel link` — ซ้ำกับกฎข้างบนและวาง `.env*`
+# ไว้หลัง `!.env.example` ทำให้ .env.example โดนกลืนไปด้วย จึงลบทิ้งแล้ว
+# ถ้ารัน vercel link อีกครั้งแล้วบรรทัดพวกนี้กลับมา ให้ลบซ้ำ

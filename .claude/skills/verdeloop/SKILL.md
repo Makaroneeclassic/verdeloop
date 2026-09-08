@@ -113,14 +113,16 @@ description: บริบททั้งหมดของโปรเจค Ver
 มีเลข ISO 14067 อยู่แล้ว (3.93 / 5.27 / 9.69 g) คู่แข่งไม่มี และผลลัพธ์เอาไปใส่รายงาน ESG ได้จริง
 
 **ฟอร์มขอตัวอย่างฟรี** — เก็บ ชื่อ · ร้าน/บริษัท · เบอร์ · ประเภทธุรกิจ · ขนาดที่สนใจ · ปริมาณใช้ต่อเดือน
-→ ส่งเข้าอีเมลทีมขายทันที
+→ **บันทึกลงฐานข้อมูล** แล้วแจ้งเตือนทีมขายทาง LINE เจ้าของเปิดดูย้อนหลังที่ `/api/admin`
 
 ---
 
 ## 6. เทคโนโลยี
 
-- Astro 5 + Tailwind v4 → static ล้วน โหลดเร็ว (สำคัญกับ Google)
-- ฟอร์มใช้ Vercel Function ส่งอีเมล
+- Astro 5 + Tailwind v4 → static ล้วน โหลดเร็ว (สำคัญกับ Google) — **ไม่มี adapter** ทุกหน้า `.astro` เรนเดอร์ตอน build
+- ฟอร์มใช้ Vercel Function (`api/lead.js`) → เก็บลง Neon Postgres แล้ว push แจ้งเตือนเข้า LINE
+- หลังบ้านดูลีดเป็น Vercel Function อีกตัว (`api/admin.js`) **ห้ามเขียนเป็นหน้า `.astro`** — เว็บนี้ static ล้วน
+  รหัสผ่านจะถูกเช็คตอน build ครั้งเดียวแล้วลีดทั้งก้อนถูกอบลง HTML สาธารณะ
 - deploy บน Vercel
 - ทุกหน้าต้องใช้งานบนมือถือได้ดี และมี heading hierarchy ที่ถูกต้อง (บทเรียนจากเว็บเก่า)
 
@@ -239,7 +241,7 @@ LINE OA : @verdeloop
 
 | เรื่อง | คำตอบ |
 |---|---|
-| ลีดเข้าที่ไหน | อีเมลทีมขาย + **แจ้งเตือนเข้า LINE** |
+| ลีดเข้าที่ไหน | **เก็บลงฐานข้อมูล Neon** เป็นหลัก + **แจ้งเตือนเข้า LINE** (ไม่ใช้อีเมล ไม่ใช้ Google Sheet — เจ้าของสั่ง 8 ก.ย. 2569) |
 | งบแอด/เดือน | **10,000–30,000 บาท** |
 | ราคาบนเว็บ | **บอกราคาเริ่มต้นได้** ("เริ่มต้น X บาท/กล่อง") |
 
@@ -306,19 +308,41 @@ LINE OA : @verdeloop
 
 ตั้ง `noindex` แยกจากหน้า SEO — กันแย่งอันดับกันเอง และปรับข้อความให้ตรงคำค้นได้อิสระ (ดัน Quality Score = จ่ายถูกลง)
 
-### สถานะงาน (อัปเดต 7 ก.ย. 2569)
+### สถานะงาน (อัปเดต 8 ก.ย. 2569)
 
 เสร็จแล้ว:
 - `/sample/` ฟอร์มเก็บลีดเต็มรูปแบบ — ทำงานได้แม้ปิด JS (HTML form post ธรรมดา), honeypot กันบอท, checkbox PDPA
-- `/api/lead.js` Vercel Function — validate ฝั่งเซิร์ฟเวอร์, ส่ง 2 ทาง (Resend + LINE push), 303 redirect กันส่งซ้ำ, log ทุกลีดกู้จาก Vercel log ได้
-- `/thank-you/` (noindex) และ `/privacy/` (PDPA + Google Ads บังคับ)
+- `/api/lead.js` Vercel Function — validate ฝั่งเซิร์ฟเวอร์, **เก็บลง Neon Postgres แล้วค่อย push LINE**, 303 redirect กันส่งซ้ำ, log ทุกลีดกู้จาก Vercel log ได้เป็นตาข่ายชั้นสุดท้าย
+- `/api/admin.js` หน้าหลังบ้านดูลีด — Basic Auth, ลบถาวรได้ (สิทธิ์ขอลบตาม PDPA), กัน CSRF ด้วยการเช็ค `Origin`, escape ทุกช่องกัน XSS, แบ่งหน้าแบบ keyset
+- `scripts/db-init.mjs` สร้างตาราง `leads` (รันครั้งเดียว รันซ้ำได้ ไม่พัง)
+- `/thank-you/` (noindex) และ `/privacy/` (PDPA + Google Ads บังคับ — ระบุ Vercel + Neon + LINE และแจ้งว่าเก็บที่สิงคโปร์)
 - `vercel.json` — function ที่ region `sin1` (สิงคโปร์ ใกล้ไทยสุด)
 - `.env.example` + `.gitignore` (กัน token หลุด)
 
-**ก่อนยิงแอดต้องตั้ง env var ใน Vercel ให้ครบ** ไม่งั้น API ตอบ 502 และลีดหาย:
-`RESEND_API_KEY` `LEAD_EMAIL_TO` `LEAD_EMAIL_FROM` `LINE_CHANNEL_ACCESS_TOKEN` `LINE_TO`
+**กติกาความสำเร็จของ `api/lead.js` — ห้ามแก้โดยไม่คิด**
 
-> ถ้ายังไม่มี Resend ระบบวิ่งด้วย LINE ทางเดียวได้ (และกลับกัน) แต่ถ้าไม่ตั้งเลยทั้งคู่ = ลีดหาย
+```
+เก็บลง DB ได้  →  200 /thank-you/   แม้ LINE ล้ม (ลีดปลอดภัย กู้จาก /api/admin ได้)
+LINE ส่งได้     →  200 /thank-you/   แม้ DB ล้ม (มีคนเห็นข้อความแล้ว)
+ล้มทั้งคู่       →  502 /sample/?error=delivery#form
+```
+
+ตอบ 502 ทั้งที่ DB เก็บได้ = ไล่ลูกค้าที่จ่ายค่าแอดซื้อมาแล้วทิ้ง ห้ามเด็ดขาด
+แต่ "สำเร็จข้างเดียว" ต้องมีสัญญาณเสมอ — DB ล้มจะมีบรรทัด ⚠️ นำหน้าข้อความ LINE ส่วน LINE ล้มจะทำให้ `notified_at` เป็น NULL แล้วแถวนั้นถูกดันขึ้นบนสุดใน `/api/admin`
+
+**ก่อนยิงแอดต้องตั้ง env var ใน Vercel ให้ครบ:**
+
+| ตัวแปร | ไม่ตั้งแล้วเกิดอะไร |
+|---|---|
+| `DATABASE_URL` | ลีดไม่ถูกบันทึก เหลือข้อความ LINE เป็นสำเนาเดียว |
+| `DATABASE_URL_UNPOOLED` | รัน `scripts/db-init.mjs` ไม่ได้ (DDL ผ่าน pooler ไม่ได้) |
+| `ADMIN_USER` / `ADMIN_PASSWORD` | `/api/admin` ตอบ 500 (ตั้งใจให้ปิดไว้ ดีกว่าเผลอเปิดสาธารณะ) |
+| `LINE_CHANNEL_ACCESS_TOKEN` / `LINE_TO` | ไม่มีใครรู้ว่ามีลีดเข้ามา จนกว่าจะเปิดหลังบ้านเอง |
+
+> ⚠️ **ห้ามให้ `DATABASE_URL` กับ environment Preview** — preview deploy ยิงลบแถวของ production ได้
+> ให้เฉพาะ Production + Development
+>
+> ถ้าไม่ตั้งทั้ง DB และ LINE เลย = ลีดหายจริง (เหลือแค่ Vercel log)
 
 ### SEO เรียงตามผลตอบแทน
 

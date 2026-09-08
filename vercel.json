@@ -4,8 +4,7 @@
   "regions": ["sin1"],
   "functions": {
     "api/lead.js": {
-      "memory": 128,
-      "maxDuration": 15
+      "maxDuration": 30
     }
   }
 }
