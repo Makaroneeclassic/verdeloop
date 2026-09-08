@@ -103,7 +103,9 @@ const schema = [
         {/* บรรทัดนี้อยู่ครึ่งบนของหน้าแรก เป็นช่องทางด่วนที่คนเห็นก่อนใคร ห้ามปล่อยว่าง
             ยังไม่มีเบอร์ จึงให้ LINE นำ แล้วค่อยต่อท้ายด้วยเบอร์เมื่อมีของจริง */}
         <p class="mt-5 text-sm text-forest-700/70">
-          สอบถามด่วน ทัก LINE
+          {/* ต้องมี {' '} คั่น — JSX ตัดช่องว่างท้ายบรรทัดที่ขึ้นบรรทัดใหม่ทิ้ง
+              ถ้าไม่ใส่จะเรนเดอร์ติดกันเป็น "ทัก LINE@verdeloop" */}
+          สอบถามด่วน ทัก LINE{' '}
           <a href={CONTACT.lineUrl} data-track="line" class="font-semibold text-forest-800 hover:underline">
             {CONTACT.lineId}
           </a>
