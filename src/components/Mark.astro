@@ -1,0 +1,45 @@
+---
+/// เครื่องหมาย ใช่/ไม่ใช่ ในตารางเทียบ
+/// ใช้ SVG วาดเอง ไม่ใช้ emoji ✅❌ เพราะ emoji เรนเดอร์ต่างกันทุกเครื่อง
+/// (Windows/Android จะออกมาเป็นสีเขียวสด-แดงสด ตัดกับโทนแบรนด์)
+interface Props {
+  yes: boolean;
+  /// ป้ายกำกับสำหรับ screen reader — ต้องสื่อความหมายในบริบทของแถวนั้น
+  label: string;
+}
+
+const { yes, label } = Astro.props;
+---
+
+{
+  yes ? (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      class="mx-auto text-forest-700"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.5 9.5 7 13l7.5-8"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  ) : (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      class="mx-auto text-forest-300"
+      aria-hidden="true"
+    >
+      <path d="M4 9h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+    </svg>
+  )
+}
+<span class="sr-only">{label}</span>

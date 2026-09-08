@@ -1,0 +1,332 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { CONTACT, PRODUCTS, SITE } from '../../data/products';
+
+const title = 'ขอตัวอย่างหลอดชานอ้อยฟรี / ขอใบเสนอราคาส่ง';
+const description =
+  'ขอตัวอย่างหลอดชานอ้อย Verdeloop ฟรี ทดลองแช่กับเครื่องดื่มของร้านก่อนตัดสินใจสั่งจริง หรือขอใบเสนอราคาขายส่ง กรอกฟอร์มแล้วทีมขายติดต่อกลับภายในวันทำการ';
+
+// ต้องตรงกับรายการที่ api/lead.js ตรวจสอบ — ถ้าแก้ที่นี่ต้องแก้ที่นั่นด้วย
+const BUSINESS_TYPES = [
+  'ร้านกาแฟ / คาเฟ่',
+  'ร้านชานมไข่มุก',
+  'ร้านอาหาร',
+  'โรงแรม / รีสอร์ท',
+  'โรงงาน / ผู้ผลิต',
+  'ตัวแทนจำหน่าย',
+  'องค์กร / หน่วยงาน',
+  'อื่น ๆ',
+];
+const SIZES = ['6 มม.', '8 มม.', '12 มม.', 'ยังไม่แน่ใจ'];
+const VOLUMES = [
+  'น้อยกว่า 5,000 ชิ้น',
+  '5,000–20,000 ชิ้น',
+  '20,000–50,000 ชิ้น',
+  'มากกว่า 50,000 ชิ้น',
+  'ยังไม่แน่ใจ',
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'ขอตัวอย่างฟรี', item: `${SITE.url}/sample/` },
+  ],
+};
+
+// คลาสร่วมของช่องกรอก — ประกาศครั้งเดียวกันหลุด
+const field =
+  'mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20';
+const label = 'block text-sm font-medium text-forest-900';
+---
+
+<Base {title} {description} {schema}>
+  <PageHead
+    eyebrow="ขอตัวอย่างฟรี"
+    heading="ลองก่อนสั่งจริง ไม่มีค่าใช้จ่าย"
+    intro="กรอกฟอร์มแล้วเราส่งตัวอย่างไปให้ทดลองแช่กับเครื่องดื่มของร้านเอง ดูด้วยตาว่าไม่เปื่อยจริงไหม ทีมขายติดต่อกลับภายในวันทำการ"
+    crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'ขอตัวอย่างฟรี' }]}
+  />
+
+  <div class="mx-auto grid max-w-6xl gap-12 px-4 py-16 lg:grid-cols-[1fr_20rem] lg:gap-16">
+    <!-- ฟอร์ม -->
+    <div>
+      <!-- แบนเนอร์แจ้ง error — ซ่อนไว้ก่อน สคริปต์ท้ายหน้าเปิดตาม ?error= ที่ API เด้งกลับมา
+           หน้านี้เป็น static จึงอ่าน query string ตอน build ไม่ได้ ต้องอ่านฝั่งเบราว์เซอร์ -->
+      <div
+        id="err-delivery"
+        role="alert"
+        hidden
+        class="mb-8 border-l-4 border-red-600 bg-red-50 px-5 py-4 text-sm text-red-900"
+      >
+        <p class="font-semibold">ส่งฟอร์มไม่สำเร็จ</p>
+        {/* กล่องนี้โผล่ตอนฟอร์มพัง = ลีดกำลังจะหลุด ต้องมีช่องทางสำรองเสมอ ห้ามว่าง */}
+        <p class="mt-1">
+          ระบบขัดข้องชั่วคราว รบกวนทัก LINE
+          <a href={CONTACT.lineUrl} data-track="line" class="font-semibold underline">{CONTACT.lineId}</a>
+          {
+            CONTACT.phone && (
+              <Fragment>
+                {' '}หรือโทร{' '}
+                <a href={CONTACT.phoneHref} data-track="phone" class="font-semibold underline">{CONTACT.phone}</a>
+              </Fragment>
+            )
+          }
+          {' '}แทน เราตอบกลับเร็วกว่าอยู่แล้ว
+        </p>
+      </div>
+
+      <div
+        id="err-validation"
+        role="alert"
+        hidden
+        class="mb-8 border-l-4 border-red-600 bg-red-50 px-5 py-4 text-sm text-red-900"
+      >
+        <p class="font-semibold">กรอกข้อมูลไม่ครบ</p>
+        <p class="mt-1">กรุณาตรวจสอบช่องที่ทำเครื่องหมายไว้ด้านล่าง</p>
+      </div>
+
+      <form id="form" method="POST" action="/api/lead" class="space-y-6">
+        <!-- honeypot: คนจริงมองไม่เห็น บอทกรอกทุกช่อง ใช้จับบอทโดยไม่ต้องให้คนแก้ captcha
+             ใช้ตำแหน่ง absolute ไม่ใช่ display:none เพราะบอทบางตัวข้ามช่องที่ซ่อนแบบนั้น -->
+        <div class="absolute left-[-9999px]" aria-hidden="true">
+          <label for="website">เว็บไซต์ (ไม่ต้องกรอก)</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="name" class={label}>
+              ชื่อผู้ติดต่อ <span class="text-red-600" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              autocomplete="name"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            />
+          </div>
+
+          <div>
+            <label for="company" class={label}>ชื่อร้าน / บริษัท</label>
+            <input
+              type="text"
+              id="company"
+              name="company"
+              autocomplete="organization"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            />
+          </div>
+
+          <div>
+            <label for="phone" class={label}>
+              เบอร์โทร <span class="text-red-600" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              required
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="08X-XXX-XXXX"
+              aria-describedby="phone-hint"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            />
+            <p id="phone-hint" class="mt-1.5 text-xs text-forest-600">
+              ช่องทางที่เราติดต่อกลับเร็วที่สุด
+            </p>
+          </div>
+
+          <div>
+            <label for="email" class={label}>อีเมล</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              aria-describedby="email-hint"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            />
+            <p id="email-hint" class="mt-1.5 text-xs text-forest-600">
+              ใส่ไว้ถ้าต้องการไฟล์ใบรับรองหรือใบเสนอราคา
+            </p>
+          </div>
+
+          <div>
+            <label for="businessType" class={label}>ประเภทธุรกิจ</label>
+            <select
+              id="businessType"
+              name="businessType"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            >
+              <option value="">เลือกประเภท</option>
+              {BUSINESS_TYPES.map((t) => <option value={t}>{t}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label for="size" class={label}>ขนาดที่สนใจ</label>
+            <select id="size" name="size" class={field} style="border-radius: var(--radius-sharp)">
+              <option value="">เลือกขนาด</option>
+              {SIZES.map((s) => <option value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="volume" class={label}>ปริมาณที่ใช้ต่อเดือน (โดยประมาณ)</label>
+            <select
+              id="volume"
+              name="volume"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+            >
+              <option value="">เลือกปริมาณ</option>
+              {VOLUMES.map((v) => <option value={v}>{v}</option>)}
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="message" class={label}>ข้อความเพิ่มเติม</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="4"
+              class={field}
+              style="border-radius: var(--radius-sharp)"
+              placeholder="เช่น ต้องการไฟล์ใบรับรองสำหรับฝ่ายจัดซื้อ หรือสอบถามเรื่องพิมพ์โลโก้บนซอง"></textarea>
+          </div>
+        </div>
+
+        <!-- PDPA: กฎหมายไทยบังคับให้ขอความยินยอมก่อนเก็บข้อมูลส่วนบุคคล
+             และ Google Ads บังคับด้วย ไม่มี = แอดโดนระงับ -->
+        <div
+          class="flex gap-3 border border-forest-200 bg-cream-100 px-4 py-3.5"
+          style="border-radius: var(--radius-sharp)"
+        >
+          <input
+            type="checkbox"
+            id="consent"
+            name="consent"
+            required
+            class="mt-1 h-4 w-4 shrink-0 accent-forest-700"
+          />
+          <label for="consent" class="text-sm text-forest-900">
+            ยินยอมให้ {CONTACT.company} เก็บและใช้ข้อมูลนี้เพื่อติดต่อกลับเรื่องสินค้า
+            ตามที่ระบุใน <a href="/privacy/" class="font-semibold underline">นโยบายความเป็นส่วนตัว</a>
+            <span class="text-red-600" aria-hidden="true">*</span>
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-forest-800 px-8 py-3.5 font-semibold text-cream-50 transition hover:bg-forest-950 sm:w-auto"
+          style="border-radius: var(--radius-sharp)"
+        >
+          ส่งคำขอตัวอย่าง
+        </button>
+
+        <p class="text-sm text-forest-700/75">
+          ไม่สะดวกกรอกฟอร์ม? ทัก
+          <a href={CONTACT.lineUrl} data-track="line" class="font-semibold text-forest-900 hover:underline">
+            LINE {CONTACT.lineId}
+          </a>
+          {
+            CONTACT.phone && (
+              <Fragment>
+                {' '}หรือโทร{' '}
+                <a href={CONTACT.phoneHref} data-track="phone" class="font-semibold text-forest-900 hover:underline">
+                  {CONTACT.phone}
+                </a>
+              </Fragment>
+            )
+          }
+          {' '}ได้เลย
+        </p>
+      </form>
+    </div>
+
+    <!-- ข้างฟอร์ม: ตอบคำถามที่ทำให้คนลังเลก่อนกดส่ง -->
+    <aside class="lg:sticky lg:top-28 lg:self-start">
+      <div
+        class="border border-forest-200 bg-cream-100 px-5 py-6"
+        style="border-radius: var(--radius-sharp)"
+      >
+        <h2 class="text-lg font-medium text-forest-900">ขั้นตอนหลังส่งฟอร์ม</h2>
+        <ol class="mt-4 space-y-4">
+          {
+            [
+              'ทีมขายโทรกลับยืนยันที่อยู่จัดส่งภายในวันทำการ',
+              'ส่งตัวอย่างให้ฟรี พร้อมไฟล์ใบรับรองถ้าต้องการ',
+              'ทดลองแช่กับเครื่องดื่มของร้านเอง แล้วค่อยตัดสินใจ',
+            ].map((s, i) => (
+              <li class="grid grid-cols-[1.75rem_1fr] gap-x-3 text-sm text-forest-800">
+                <span class="index-num text-base text-cane-500" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>{s}</span>
+              </li>
+            ))
+          }
+        </ol>
+
+        <div class="tick-rule my-6 text-forest-700"></div>
+
+        <h2 class="text-lg font-medium text-forest-900">ขนาดที่มี</h2>
+        <ul class="tabular mt-3 space-y-2 text-sm">
+          {
+            PRODUCTS.map((p) => (
+              <li class="flex justify-between gap-3 text-forest-800">
+                <a href={`/products/${p.slug}/`} class="font-medium hover:underline">
+                  {p.shortName}
+                </a>
+                <span class="text-right text-forest-600">{p.useCase}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <p class="mt-5 border-l-2 border-cane-500 pl-4 text-sm text-forest-800">
+        ลูกค้าองค์กรที่ต้องการเอกสารประกอบการจัดซื้อหรือรายงาน ESG
+        แจ้งในช่องข้อความได้เลย เราแนบไฟล์ไปให้พร้อมกัน
+      </p>
+    </aside>
+  </div>
+</Base>
+
+<!-- อ่าน ?error= ที่ API เด้งกลับมา แล้วเปิดแบนเนอร์ + ไฮไลต์ช่องที่ผิด
+     ต้องทำฝั่งเบราว์เซอร์เพราะหน้านี้ static — query string ตอน build ว่างเสมอ -->
+<script is:inline>
+  (() => {
+    const raw = new URLSearchParams(location.search).get('error');
+    if (!raw) return;
+
+    if (raw === 'delivery') {
+      document.getElementById('err-delivery')?.removeAttribute('hidden');
+      return;
+    }
+
+    document.getElementById('err-validation')?.removeAttribute('hidden');
+
+    for (const name of raw.split(',')) {
+      const el = document.getElementById(name.trim());
+      if (!el) continue;
+      el.setAttribute('aria-invalid', 'true');
+      el.classList.add('border-red-500');
+    }
+
+    // ล้าง query string ออกจาก URL — กันสับสนตอนผู้ใช้แก้แล้วส่งใหม่
+    // และกัน Google Ads นับ URL ที่มี ?error= เป็นหน้าคนละหน้า
+    history.replaceState(null, '', location.pathname + location.hash);
+  })();
+</script>

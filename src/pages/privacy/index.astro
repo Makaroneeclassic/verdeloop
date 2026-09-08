@@ -1,0 +1,191 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { CONTACT, SITE } from '../../data/products';
+
+/// Google Ads บังคับให้มีหน้านี้ ไม่มี = แอดโดนระงับ
+/// และ PDPA บังคับให้แจ้งวัตถุประสงค์การเก็บข้อมูลก่อนเก็บ
+/// เนื้อหาต้องตรงกับสิ่งที่ api/lead.js ทำจริง — เก็บอะไร ส่งไปไหน
+const title = 'นโยบายความเป็นส่วนตัว';
+const description =
+  'นโยบายความเป็นส่วนตัวของ Verdeloop — เราเก็บข้อมูลอะไร ใช้ทำอะไร เก็บนานเท่าไหร่ และคุณขอลบได้อย่างไร ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)';
+
+const updated = '7 กันยายน 2569';
+
+// รายการนี้ต้องตรงกับช่องในฟอร์ม /sample/ และ field ที่ api/lead.js เก็บจริง
+const collected = [
+  { item: 'ชื่อผู้ติดต่อ', why: 'ใช้เรียกชื่อตอนติดต่อกลับ' },
+  { item: 'ชื่อร้าน / บริษัท', why: 'ใช้ออกใบเสนอราคาและเอกสารจัดซื้อ' },
+  { item: 'เบอร์โทรศัพท์', why: 'ช่องทางหลักในการติดต่อกลับ' },
+  { item: 'อีเมล', why: 'ส่งไฟล์ใบรับรองหรือใบเสนอราคา (กรอกหรือไม่ก็ได้)' },
+  { item: 'ประเภทธุรกิจ ขนาดที่สนใจ ปริมาณต่อเดือน', why: 'เสนอขนาดและราคาที่ตรงกับการใช้งานจริง' },
+  { item: 'ข้อความเพิ่มเติม', why: 'รายละเอียดที่คุณแจ้งมาเอง' },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'นโยบายความเป็นส่วนตัว', item: `${SITE.url}/privacy/` },
+  ],
+};
+
+const h2 = 'text-2xl font-medium text-forest-900';
+const p = 'mt-3 text-forest-800/85';
+---
+
+<Base {title} {description} {schema}>
+  <PageHead
+    eyebrow="ข้อมูลทางกฎหมาย"
+    heading="นโยบายความเป็นส่วนตัว"
+    intro={`อธิบายว่าเราเก็บข้อมูลอะไรจากคุณ เอาไปทำอะไร และคุณขอแก้หรือขอลบได้อย่างไร ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)`}
+    crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'นโยบายความเป็นส่วนตัว' }]}
+  />
+
+  <div class="mx-auto max-w-3xl px-4 py-16">
+    <p class="text-sm text-forest-600">ปรับปรุงล่าสุด {updated}</p>
+
+    <section class="mt-10">
+      <h2 class={h2}>ผู้เก็บข้อมูล</h2>
+      <p class={p}>
+        {CONTACT.company} เจ้าของแบรนด์ {SITE.name}
+      </p>
+      {/* PDPA บังคับว่าต้องระบุช่องทางติดต่อผู้ควบคุมข้อมูลอย่างน้อยหนึ่งช่องทาง
+          ยังไม่มีเบอร์/อีเมลของบริษัทเอง จึงซ่อนไว้และให้ LINE ทำหน้าที่แทนชั่วคราว
+          หน้านี้จะขาดช่องทางไม่ได้เด็ดขาด ไม่งั้นผิดทั้ง PDPA และเกณฑ์ Google Ads */}
+      <address class="mt-3 text-forest-800/85 not-italic">
+        {CONTACT.address}<br />
+        {
+          CONTACT.phone && (
+            <Fragment>
+              โทร <a href={CONTACT.phoneHref} class="font-medium text-forest-900 hover:underline">{CONTACT.phone}</a><br />
+            </Fragment>
+          )
+        }
+        {
+          CONTACT.email && (
+            <Fragment>
+              อีเมล <a href={`mailto:${CONTACT.email}`} class="font-medium text-forest-900 hover:underline">{CONTACT.email}</a><br />
+            </Fragment>
+          )
+        }
+        LINE <a href={CONTACT.lineUrl} data-track="line" class="font-medium text-forest-900 hover:underline">{CONTACT.lineId}</a>
+      </address>
+    </section>
+
+    <div class="tick-rule my-10 max-w-[12rem] text-forest-700"></div>
+
+    <section>
+      <h2 class={h2}>ข้อมูลที่เราเก็บ</h2>
+      <p class={p}>
+        เราเก็บเฉพาะข้อมูลที่คุณกรอกในฟอร์มขอตัวอย่างเองเท่านั้น ไม่ได้ซื้อหรือรับข้อมูลจากที่อื่น
+      </p>
+      <dl class="mt-6 divide-y divide-forest-200/70 border-y border-forest-200/70">
+        {
+          collected.map((c) => (
+            <div class="grid gap-1 py-4 sm:grid-cols-[16rem_1fr] sm:gap-8">
+              <dt class="font-medium text-forest-900">{c.item}</dt>
+              <dd class="text-forest-800/85">{c.why}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>วัตถุประสงค์ในการใช้</h2>
+      <p class={p}>
+        ใช้เพื่อติดต่อกลับเรื่องสินค้า จัดส่งตัวอย่าง ออกใบเสนอราคา และตอบคำถามของคุณเท่านั้น
+        <strong class="font-semibold text-forest-900">เราไม่ขายและไม่แลกเปลี่ยนข้อมูลของคุณกับบุคคลภายนอก</strong>
+        และจะไม่ส่งข้อความโฆษณาหากคุณไม่ได้ร้องขอ
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>ข้อมูลถูกส่งไปที่ไหน</h2>
+      <p class={p}>
+        เมื่อคุณกดส่งฟอร์ม ข้อมูลจะถูกส่งไปยังทีมขายของเราผ่านอีเมลและ LINE Official Account
+        โดยผ่านผู้ให้บริการเหล่านี้ ซึ่งทำหน้าที่เป็นผู้ประมวลผลข้อมูลแทนเรา
+      </p>
+      <ul class="mt-5 space-y-2.5 text-forest-800/85">
+        <li class="border-l-2 border-cane-500 pl-4">
+          <strong class="font-medium text-forest-900">Vercel</strong> — โฮสต์เว็บไซต์และประมวลผลการส่งฟอร์ม
+        </li>
+        <li class="border-l-2 border-cane-500 pl-4">
+          <strong class="font-medium text-forest-900">Resend</strong> — ส่งอีเมลแจ้งทีมขาย
+        </li>
+        <li class="border-l-2 border-cane-500 pl-4">
+          <strong class="font-medium text-forest-900">LINE</strong> — แจ้งเตือนทีมขายผ่าน LINE Official Account
+        </li>
+      </ul>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>คุกกี้และการวัดผลโฆษณา</h2>
+      <p class={p}>
+        เว็บไซต์นี้ใช้ Google Analytics และ Google Ads เพื่อวัดว่าโฆษณาและหน้าเว็บทำงานได้ผลแค่ไหน
+        เครื่องมือเหล่านี้ใช้คุกกี้เก็บข้อมูลการเข้าชมแบบไม่ระบุตัวตน เช่น หน้าที่คุณเปิดและช่องทางที่พาคุณมา
+        คุณปิดคุกกี้ได้จากการตั้งค่าเบราว์เซอร์ โดยไม่กระทบการใช้งานเว็บไซต์
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>ระยะเวลาเก็บรักษา</h2>
+      <p class={p}>
+        เราเก็บข้อมูลลูกค้าที่ติดต่อเข้ามาไว้ไม่เกิน 3 ปีนับจากการติดต่อครั้งสุดท้าย
+        เพื่อให้บริการหลังการขายและติดตามการสั่งซื้อซ้ำ หลังจากนั้นจะลบทิ้ง
+        ยกเว้นเอกสารที่กฎหมายภาษีหรือบัญชีกำหนดให้ต้องเก็บนานกว่านั้น
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>สิทธิของคุณตาม PDPA</h2>
+      <p class={p}>คุณมีสิทธิดังต่อไปนี้ และใช้สิทธิได้ทุกเมื่อโดยไม่มีค่าใช้จ่าย</p>
+      <ul class="mt-5 space-y-2.5 text-forest-800/85">
+        <li class="border-l-2 border-cane-500 pl-4">ขอดูข้อมูลที่เราเก็บไว้เกี่ยวกับคุณ</li>
+        <li class="border-l-2 border-cane-500 pl-4">ขอแก้ไขข้อมูลที่ไม่ถูกต้อง</li>
+        <li class="border-l-2 border-cane-500 pl-4">ขอลบข้อมูล หรือถอนความยินยอมที่เคยให้ไว้</li>
+        <li class="border-l-2 border-cane-500 pl-4">ขอให้ระงับการใช้ข้อมูล หรือคัดค้านการประมวลผล</li>
+        <li class="border-l-2 border-cane-500 pl-4">ร้องเรียนต่อสำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล</li>
+      </ul>
+      <p class="mt-5 text-forest-800/85">
+        ใช้สิทธิได้โดยติดต่อมาที่{' '}
+        {
+          CONTACT.email && (
+            <Fragment>
+              อีเมล{' '}
+              <a href={`mailto:${CONTACT.email}`} class="font-semibold text-forest-900 hover:underline">
+                {CONTACT.email}
+              </a>{' '}
+              หรือ
+            </Fragment>
+          )
+        }
+        LINE{' '}
+        <a href={CONTACT.lineUrl} data-track="line" class="font-semibold text-forest-900 hover:underline">
+          {CONTACT.lineId}
+        </a>
+        {
+          CONTACT.phone && (
+            <Fragment>
+              {' '}หรือโทร{' '}
+              <a href={CONTACT.phoneHref} data-track="phone" class="font-semibold text-forest-900 hover:underline">
+                {CONTACT.phone}
+              </a>
+            </Fragment>
+          )
+        }
+        {' '}เราดำเนินการให้ภายใน 30 วัน
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class={h2}>การเปลี่ยนแปลงนโยบาย</h2>
+      <p class={p}>
+        หากมีการแก้ไขนโยบายนี้ เราจะอัปเดตวันที่ด้านบนหน้านี้
+        กรณีเป็นการเปลี่ยนแปลงสาระสำคัญ เราจะแจ้งให้ผู้ที่ให้ข้อมูลไว้ทราบทางอีเมล
+      </p>
+    </section>
+  </div>
+</Base>

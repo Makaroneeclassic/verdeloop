@@ -1,0 +1,113 @@
+---
+import Base from '../../layouts/Base.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHead from '../../components/PageHead.astro';
+import { CERTIFICATIONS, SITE } from '../../data/products';
+
+const title = 'ใบรับรองมาตรฐาน — TUV Home Compost, FDA, ISO';
+const description =
+  'หลอดชานอ้อย Verdeloop ผ่านการรับรอง TUV Austria Home Compost, ISO 14067, ISO 9001, ISO 22000, HACCP, FDA, EU No.10/2011, DIN CERTCO, BPI, PFAS Free และ Gluten Free';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'ใบรับรอง', item: `${SITE.url}/certifications/` },
+  ],
+};
+
+// แยกใบที่เป็นจุดขายออกมาก่อน ที่เหลือเรียงเป็นรายการต่อ
+const featured = CERTIFICATIONS.filter((c) => c.featured);
+const rest = CERTIFICATIONS.filter((c) => !c.featured);
+---
+
+<Base {title} {description} {schema}>
+  <PageHead
+    eyebrow="มาตรฐาน"
+    heading="ใบรับรองมาตรฐาน"
+    intro="ทุกใบผ่านการตรวจจากหน่วยงานอิสระระดับสากล ใช้อ้างอิงกับฝ่ายจัดซื้อ ฝ่ายความยั่งยืน และหน่วยงานราชการได้"
+    crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'ใบรับรอง' }]}
+  />
+
+  <!-- ใบที่เป็นจุดขาย — ให้พื้นที่มากกว่า และมีเลขกำกับให้อ่านไล่ลำดับ -->
+  <section class="mx-auto max-w-5xl px-4 py-16" aria-labelledby="key">
+    <p class="eyebrow">สามใบที่ลูกค้าองค์กรถามถึงมากที่สุด</p>
+    <h2 id="key" class="sr-only">ใบรับรองหลัก</h2>
+
+    <ol class="mt-7 space-y-8">
+      {
+        featured.map((c, i) => (
+          <li class="grid gap-x-5 gap-y-5 border-b border-forest-200/70 pb-8 last:border-0 sm:grid-cols-[3rem_1fr_9rem] sm:items-start">
+            <span class="index-num pt-1 text-2xl text-cane-500" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <h3 class="text-xl font-medium text-forest-900">{c.name}</h3>
+              <p class="mt-2.5 text-forest-800/85">{c.detail}</p>
+            </div>
+            {/* โลโก้อยู่คอลัมน์ขวาบนจอกว้าง — ตกลงมาใต้ข้อความบนมือถือ
+                พื้นขาวรองไว้เพราะเครื่องหมายรับรองออกแบบมาให้อยู่บนพื้นขาว วางบนพื้นครีมสีจะเพี้ยน
+                alt เขียนว่า "เครื่องหมายรับรอง…" ไม่ใช่แค่ชื่อ — บอก Google ว่านี่คือหลักฐานการรับรอง */}
+            {c.logo && (
+              <img
+                src={c.logo.src}
+                alt={`เครื่องหมายรับรอง ${c.name}`}
+                width={c.logo.width}
+                height={c.logo.height}
+                loading="lazy"
+                decoding="async"
+                class="h-16 w-auto justify-self-start bg-white p-2 ring-1 ring-forest-200/70 sm:justify-self-end"
+                style="border-radius: var(--radius-sharp)"
+              />
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- ใบที่เหลือ — รายการแน่น ๆ อ่านเร็ว ไม่ต้องเป็นการ์ดใบละกล่อง -->
+  <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="more">
+    <div class="mx-auto max-w-5xl px-4 py-16">
+      <p class="eyebrow">มาตรฐานอื่นที่ผ่านการรับรอง</p>
+      <h2 id="more" class="sr-only">ใบรับรองอื่น</h2>
+
+      {/* โลโก้อยู่คอลัมน์ซ้ายความกว้างคงที่ — ไอคอนเรียงตรงกันเป็นแนวตั้ง กวาดตาหาได้เร็ว
+          ไอคอนชุดนี้พื้นโปร่งใสสีเขียวโทนเดียว วางบนพื้นครีมได้เลย ไม่ต้องมีกล่องขาวรอง */}
+      <dl class="mt-7 divide-y divide-forest-200/70 border-y border-forest-200/70">
+        {
+          rest.map((c) => (
+            <div class="grid items-center gap-x-6 gap-y-2 py-5 sm:grid-cols-[4.5rem_16rem_1fr]">
+              {c.logo ? (
+                <img
+                  src={c.logo.src}
+                  alt={`เครื่องหมายรับรอง ${c.name}`}
+                  width={c.logo.width}
+                  height={c.logo.height}
+                  loading="lazy"
+                  decoding="async"
+                  class="h-12 w-auto max-w-[4.5rem] object-contain object-left"
+                />
+              ) : (
+                <span class="hidden sm:block" aria-hidden="true" />
+              )}
+              <dt class="font-medium text-forest-900">{c.name}</dt>
+              <dd class="text-forest-800/85 sm:col-start-3">{c.detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <p class="mt-8 max-w-2xl border-l-2 border-cane-500 pl-5 text-forest-900">
+        ต้องการไฟล์ใบรับรองตัวจริงเพื่อประกอบการจัดซื้อหรือรายงาน ESG
+        แจ้งได้ทางฟอร์มขอตัวอย่างหรือทัก LINE เราส่งให้ทางอีเมล
+      </p>
+    </div>
+  </section>
+
+  <CtaBand
+    heading="ต้องการเอกสารประกอบการจัดซื้อ?"
+    sub="แจ้งชื่อบริษัทและเอกสารที่ต้องการ เราจัดส่งให้ทางอีเมลภายในวันทำการ"
+  />
+</Base>

@@ -1,0 +1,95 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/products';
+
+interface Props {
+  title: string;
+  description: string;
+  /// ภาพสำหรับแชร์ลง LINE/Facebook — ถ้าไม่ส่งใช้ภาพกลางของแบรนด์
+  image?: string;
+  /// JSON-LD เพิ่มเติมของแต่ละหน้า (Product, FAQPage, BreadcrumbList)
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+  /// หน้าที่ไม่อยากให้ Google เก็บ index เช่นหน้าขอบคุณหลังส่งฟอร์ม
+  noindex?: boolean;
+}
+
+const { title, description, image, schema, noindex = false } = Astro.props;
+
+// canonical ต้องเป็น URL เต็มและไม่มี query string — กัน Google มองว่าเป็นหน้าซ้ำ
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// ภาพตอนแชร์ลิงก์ — ต้องเป็น 1200x630 และเป็น JPEG/PNG ทึบ
+// อย่าส่งรูปสินค้าพื้นโปร่งใสมาตรง ๆ: LINE/Facebook เรนเดอร์พื้นใสเป็นสีดำ
+// ไฟล์ชุดนี้ประกอบไว้แล้วใน /img/og/ มีชื่อแบรนด์กับหัวข้อในรูป
+const ogImage = new URL(image ?? '/img/og/og-default.jpg', Astro.site).href;
+
+// title รวมชื่อแบรนด์ท้ายเสมอ ยกเว้นหน้าแรกที่ตั้ง title เต็มมาเอง
+const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
+
+// Organization schema ใส่ทุกหน้า — บอก Google ว่าใครเป็นเจ้าของเว็บ
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE.name,
+  url: SITE.url,
+  logo: new URL('/logo.svg', Astro.site).href,
+  description: 'ผู้ผลิตและจำหน่ายหลอดดูดเครื่องดื่มจากชานอ้อย ย่อยสลายได้เองตามธรรมชาติ',
+  areaServed: 'TH',
+};
+
+const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+---
+
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="th_TH" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#172e25" /><!-- ตรงกับ forest-900 ที่ใช้เป็นพื้น header/hero -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- ฟอนต์เรียกตรงจาก <link> ไม่ผ่าน @import ใน CSS
+         เบราว์เซอร์จะเริ่มโหลดฟอนต์พร้อมกับ CSS แทนที่จะรอ CSS เสร็จก่อน (ดีต่อ LCP)
+         preconnect ทั้งสองโดเมน: googleapis = ไฟล์ CSS, gstatic = ไฟล์ฟอนต์จริง
+
+         ฟอนต์เดียวทั้งเว็บ 4 น้ำหนัก: 400 เนื้อความ · 500-600 หัวข้อ · 700 เฉพาะ h1 hero
+         ต้องโหลด 700 ด้วย ไม่งั้นเบราว์เซอร์ปลอมตัวหนาให้เอง (faux bold)
+         ซึ่งในภาษาไทยจะบวมและขอบเบลอ เห็นชัดกว่าภาษาอังกฤษมาก -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
+    />
+
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body class="flex min-h-dvh flex-col font-sans">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-forest-800 focus:px-4 focus:py-2 focus:text-cream-50"
+    >
+      ข้ามไปเนื้อหาหลัก
+    </a>
+    <Header />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

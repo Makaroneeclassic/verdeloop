@@ -1,0 +1,101 @@
+---
+import { CONTACT, PRODUCTS, SITE } from '../data/products';
+
+const year = new Date().getFullYear() + 543; // พ.ศ.
+---
+
+<!-- footer ต่อเนื่องกับ CtaBand (สีเดียวกัน) — คั่นด้วยเส้นสเกลแทนการเปลี่ยนพื้นหลัง -->
+<footer class="bg-forest-900 text-cream-100">
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="border-t border-forest-800"></div>
+  </div>
+
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="sm:col-span-2 lg:col-span-1">
+      <p class="text-xl font-medium text-cream-50">{SITE.name}</p>
+      <p class="mt-3 text-sm text-cream-200/75">
+        หลอดดูดเครื่องดื่มจากชานอ้อย ย่อยสลายได้เองตามธรรมชาติ
+        แช่เครื่องดื่มได้นานโดยไม่เปื่อยยุ่ย
+      </p>
+    </div>
+
+    <nav aria-labelledby="f-products">
+      <p id="f-products" class="text-[0.7rem] font-semibold tracking-[0.14em] text-cane-300 uppercase">
+        สินค้า
+      </p>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {
+          PRODUCTS.map((p) => (
+            <li>
+              <a href={`/products/${p.slug}/`} class="text-cream-200/80 hover:text-cream-50">
+                หลอดชานอ้อย {p.shortName}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href="/products/" class="text-cream-200/80 hover:text-cream-50">สินค้าทั้งหมด</a>
+        </li>
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="f-learn">
+      <p id="f-learn" class="text-[0.7rem] font-semibold tracking-[0.14em] text-cane-300 uppercase">
+        ข้อมูลน่ารู้
+      </p>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        <li><a href="/compare/" class="text-cream-200/80 hover:text-cream-50">เทียบชานอ้อย vs กระดาษ vs PLA</a></li>
+        <li><a href="/paper-straw-problem/" class="text-cream-200/80 hover:text-cream-50">หลอดกระดาษเปื่อยยุ่ย แก้อย่างไร</a></li>
+        <li><a href="/esg/" class="text-cream-200/80 hover:text-cream-50">คาร์บอนฟุตพริ้นต์ & ESG</a></li>
+        <li><a href="/certifications/" class="text-cream-200/80 hover:text-cream-50">ใบรับรองมาตรฐาน</a></li>
+        <li><a href="/faq/" class="text-cream-200/80 hover:text-cream-50">คำถามที่พบบ่อย</a></li>
+      </ul>
+    </nav>
+
+    <div>
+      <p class="text-[0.7rem] font-semibold tracking-[0.14em] text-cane-300 uppercase">ติดต่อสั่งซื้อ</p>
+      <address class="mt-4 space-y-2.5 text-sm not-italic text-cream-200/80">
+        <p>{CONTACT.company}</p>
+        <p class="text-cream-200/65">{CONTACT.address}</p>
+        {/* เบอร์กับอีเมลยังไม่มีของ Verdeloop เอง — ซ่อนไว้ก่อนดีกว่าโชว์ของบริษัทอื่น */}
+        {
+          CONTACT.phone && (
+            <p>
+              <a
+                href={CONTACT.phoneHref}
+                data-track="phone"
+                class="font-semibold text-cream-50 hover:underline"
+              >
+                {CONTACT.phone}
+              </a>
+            </p>
+          )
+        }
+        {
+          CONTACT.email && (
+            <p>
+              <a href={`mailto:${CONTACT.email}`} class="hover:text-cream-50">
+                {CONTACT.email}
+              </a>
+            </p>
+          )
+        }
+        <p>
+          <a href={CONTACT.lineUrl} data-track="line" class="hover:text-cream-50">
+            LINE {CONTACT.lineId}
+          </a>
+        </p>
+      </address>
+    </div>
+  </div>
+
+  <div class="border-t border-forest-800">
+    <div
+      class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-cream-200/55"
+    >
+      <p>© {year} {SITE.name} · {CONTACT.company}</p>
+      <!-- Google Ads บังคับให้เข้าถึงหน้านโยบายได้จากทุกหน้า -->
+      <a href="/privacy/" class="hover:text-cream-50">นโยบายความเป็นส่วนตัว</a>
+    </div>
+  </div>
+</footer>

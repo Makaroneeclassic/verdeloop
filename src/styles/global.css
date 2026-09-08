@@ -1,0 +1,127 @@
+/* ใช้ IBM Plex Sans Thai ตัวเดียวทั้งเว็บ ตามแบบหัวข้อ hero ที่เจ้าของเลือก
+   แยกหัวข้อกับเนื้อความด้วย "ขนาด + น้ำหนัก" ไม่ใช่ด้วยการสลับฟอนต์
+   (เคยลองคู่กับ Pridi แล้ว — Pridi มีเชิงเฉพาะตัวละติน ส่วนตัวไทยไม่มีหัวเหมือนกัน
+    บนเว็บไทยล้วนจึงแยกไม่ออก ได้แค่ไฟล์ฟอนต์เพิ่มมาเปล่า ๆ)
+   ฟอนต์ชุดเดียว = โหลดน้อยลง = LCP ดีขึ้น ซึ่ง Google ใช้จัดอันดับ
+
+   ตัวไฟล์ฟอนต์เรียกจาก <link> ใน Base.astro ไม่ใช่ @import ที่นี่ —
+   @import ในไฟล์ CSS ทำให้เบราว์เซอร์ต้องโหลด CSS เสร็จก่อนถึงจะเริ่มโหลดฟอนต์ (โหลดต่อกันเป็นทอด) */
+@import 'tailwindcss';
+
+@theme {
+  /* เขียวเข้ม — สีหลัก สื่อธรรมชาติ + น่าเชื่อถือสำหรับฝ่ายจัดซื้อ */
+  --color-forest-50: #f2f7f3;
+  --color-forest-100: #dfebe2;
+  --color-forest-200: #bdd6c5;
+  --color-forest-300: #92b8a0;
+  --color-forest-400: #63947a;
+  --color-forest-500: #427659;
+  --color-forest-600: #2f5d46;
+  --color-forest-700: #264b39;
+  --color-forest-800: #1e3b2e;
+  --color-forest-900: #172e25;
+  --color-forest-950: #0d1b16;
+
+  /* ครีม — พื้นหลังอุ่น ไม่แสบตาเท่าขาวล้วน เข้ากับสีชานอ้อย */
+  --color-cream-50: #fcfaf5;
+  --color-cream-100: #f7f3e9;
+  --color-cream-200: #efe8d6;
+  --color-cream-300: #e2d5b8;
+
+  /* น้ำตาลชานอ้อย — สีเน้นรอง ใช้กับตัวเลขและเส้นคั่นสำคัญ */
+  --color-cane-300: #d9bd90;
+  --color-cane-500: #b28b4f;
+  --color-cane-600: #8f6d3a;
+
+  --font-sans: 'IBM Plex Sans Thai', system-ui, sans-serif;
+  /* display ชี้ไปที่ฟอนต์เดียวกัน — คงชื่อ token ไว้เพื่อไม่ต้องแก้ class ทั้งเว็บ
+     และเผื่ออนาคตอยากเปลี่ยนฟอนต์หัวข้อ แก้ที่บรรทัดนี้บรรทัดเดียวจบ */
+  --font-display: var(--font-sans);
+
+  /* มุมโค้งใช้แค่ค่าเดียวทั้งเว็บ (4px) — งานออกแบบจริงไม่ผสมมุมมนหลายขนาด
+     ยกเว้นปุ่มที่ใช้ full round เพื่อให้กดง่ายบนมือถือ */
+  --radius-sharp: 4px;
+}
+
+/* ค่าเริ่มต้นของ element ต้องอยู่ใน @layer base เสมอ
+   CSS สมัยใหม่ตัดสินจาก "ชั้น (layer)" ก่อน specificity — กฎที่ไม่อยู่ในชั้นใดเลย
+   จะชนะทุกกฎที่อยู่ในชั้น รวมถึง utility ของ Tailwind ทั้งหมด
+   ถ้าเขียนนอก layer แล้วสั่ง class="font-sans" หรือ "leading-relaxed" ทับจะไม่ติด
+   (เคยพลาดมาแล้ว: h1 ของ hero ใส่ font-sans ไว้แต่ทับฟอนต์หัวข้อไม่ได้) */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--color-cream-50);
+    color: var(--color-forest-950);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ภาษาไทยมีสระบนล่าง ต้องการ line-height มากกว่าละติน ไม่งั้นวรรณยุกต์ชนกัน */
+  p, li, dd {
+    line-height: 1.85;
+  }
+
+  /* หัวข้อใช้ฟอนต์เดียวกับเนื้อความ ต่างกันที่ระยะบรรทัดแคบกว่าและตัวอักษรชิดกว่า
+     ตัวหนาสั่งเป็นราย element ใน markup (ส่วนใหญ่ font-medium/semibold) */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* คลาสของเราเองอยู่ชั้น components — ต่ำกว่า utilities ของ Tailwind
+   เผื่อวันหลังอยากใช้ utility ทับเป็นรายจุด จะทับได้จริง */
+@layer components {
+  /* ป้ายกำกับหมวด — ตัวเล็ก เว้นตัวอักษรกว้าง ใช้แทนป้ายกลมสำเร็จรูป */
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-cane-600);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* อุปกรณ์ประจำแบรนด์: ลายขีดสเกลวัดขนาด
+   สินค้านี้ตัดสินใจซื้อกันที่ตัวเลข 6/8/12 มม. เลยเอาสเกลไม้บรรทัดมาเป็นลายเส้นคั่น
+   แทนที่จะใช้เส้นเทา ๆ ธรรมดาหรือ gradient จาง ๆ ที่ไม่ได้สื่ออะไร */
+.tick-rule {
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0,
+    currentColor 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  opacity: 0.28;
+}
+
+/* CtaBand เป็นแถบเข้มเต็มความกว้างที่ต่อกับ footer พอดี ไม่ต้องมีช่องว่างคั่น
+   แต่หน้าที่ไม่มี CtaBand ต้องเว้นระยะก่อนถึง footer เอง */
+main:not(:has([data-cta])) + footer {
+  margin-top: 5rem;
+}
+
+/* หมายเลขลำดับตัวโต ใช้นำสายตาในลิสต์เชิงบทความ */
+.index-num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

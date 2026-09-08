@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+
+# ห้าม commit เด็ดขาด — มี LINE Channel Access Token กับ Resend API key
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log

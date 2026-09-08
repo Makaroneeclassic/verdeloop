@@ -1,0 +1,40 @@
+---
+/// หน้าชั่วคราวสำหรับหน้าที่ยังไม่ได้ทำเนื้อหา
+/// ใส่ noindex ไว้ไม่ให้ Google เก็บหน้าเปล่าไปแสดงผล — จะเอาออกเมื่อเขียนเนื้อหาจริง
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import PageHead from '../components/PageHead.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  intro: string;
+  /// หัวข้อที่หน้านี้จะมีเมื่อทำเสร็จ — ให้เจ้าของเห็นภาพว่าจะได้อะไร
+  outline: string[];
+}
+
+const { title, description, heading, intro, outline } = Astro.props;
+---
+
+<Base {title} {description} noindex>
+  <PageHead eyebrow="หน้านี้กำลังจัดทำ" {heading} {intro} />
+
+  <section class="mx-auto max-w-3xl px-4 py-16">
+    <h2 class="eyebrow">เนื้อหาที่จะมีในหน้านี้</h2>
+    <ol class="mt-6 divide-y divide-forest-200/70 border-y border-forest-200/70">
+      {
+        outline.map((o, i) => (
+          <li class="grid grid-cols-[2.5rem_1fr] gap-x-4 py-4">
+            <span class="index-num text-lg text-cane-500" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span class="text-forest-900">{o}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <CtaBand />
+</Base>
