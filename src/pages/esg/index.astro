@@ -1,17 +1,307 @@
 ---
-import Stub from '../_Stub.astro';
+import Base from '../../layouts/Base.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHead from '../../components/PageHead.astro';
+import { PRODUCTS, SITE } from '../../data/products';
+
+/// หน้าตัวชี้ขาดกับลูกค้าองค์กร — เรามีตัวเลข ISO 14067 จริงที่คู่แข่งส่วนใหญ่ไม่เปิดเผย
+/// เครื่องคิดเลขทำงานฝั่ง client ล้วน ไม่มี build step ไม่มี framework
+///
+/// ⚠️ ตัวเลขเทียบเท่าที่ใช้ในเครื่องคิดเลข ต้องมีที่มาระบุได้ทุกตัว ห้ามเดา
+/// เพราะลูกค้าเอาไปใส่รายงาน ESG ที่มีผู้ตรวจสอบ ถ้าตัวเลขไม่มีที่มา = เราทำให้เขาเสียหาย
+/// ตัวหารที่ใช้และที่มาอยู่ในคอมเมนต์ตรงสคริปต์ด้านล่าง
+const title = 'คาร์บอนฟุตพริ้นต์หลอดชานอ้อย ISO 14067 — ตัวเลขสำหรับรายงาน ESG';
+const description =
+  'ตัวเลขคาร์บอนฟุตพริ้นต์ของหลอดชานอ้อย Verdeloop ทั้ง 3 ขนาด ตรวจวัดตามมาตรฐาน ISO 14067 พร้อมเครื่องคำนวณว่าร้านหรือองค์กรของคุณลด CO2 ได้เท่าไหร่ต่อปี นำไปอ้างอิงในรายงานความยั่งยืนได้';
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'ESG & คาร์บอน', item: `${SITE.url}/esg/` },
+    ],
+  },
+];
+
+/// ส่งตัวเลข CO₂ จากไฟล์ข้อมูลไปให้สคริปต์ฝั่ง client ผ่าน data attribute
+/// จะได้มีแหล่งความจริงเดียว ไม่ต้องพิมพ์เลขซ้ำใน JS
+const co2Map = JSON.stringify(
+  Object.fromEntries(PRODUCTS.map((p) => [p.size, p.co2PerStraw])),
+);
 ---
 
-<Stub
-  title="คาร์บอนฟุตพริ้นต์ & ESG — ตัวเลขที่ใช้อ้างอิงได้"
-  description="ตัวเลขคาร์บอนฟุตพริ้นต์ของหลอดชานอ้อย Verdeloop ผ่านการตรวจวัดตามมาตรฐาน ISO 14067 พร้อมเครื่องคำนวณว่าร้านคุณลด CO2 ได้เท่าไหร่ต่อปี นำไปใส่รายงานความยั่งยืนได้"
-  heading="คาร์บอนฟุตพริ้นต์ & ESG"
-  intro="หน้านี้คืออาวุธหลักกับลูกค้าองค์กร เพราะเรามีตัวเลข ISO 14067 จริงที่คู่แข่งส่วนใหญ่ไม่มี"
-  outline={[
-    'เครื่องคำนวณ: ใส่จำนวนแก้วต่อวัน → บอกว่าปีหนึ่งลด CO₂ ได้กี่กิโล เทียบเท่าปลูกต้นไม้กี่ต้น',
-    'ตัวเลข ISO 14067 ทั้ง 3 ขนาด (3.93 / 5.27 / 9.69 กรัม CO₂e ต่อหลอด)',
-    'ข้อความสำเร็จรูปให้ก๊อปไปใส่รายงาน ESG ขององค์กรได้เลย',
-    'เรื่องราว upcycle: ชานอ้อยเหลือทิ้งจากการเกษตร กลายเป็นหลอด',
-    'ดาวน์โหลดเอกสารรับรองเป็น PDF',
-  ]}
-/>
+<Base {title} {description} {schema}>
+  <PageHead
+    eyebrow="ESG & คาร์บอนฟุตพริ้นต์"
+    heading="ตัวเลขคาร์บอนที่ใช้อ้างอิงในรายงานได้"
+    intro="หลอดทุกขนาดผ่านการตรวจวัดคาร์บอนฟุตพริ้นต์ตามมาตรฐาน ISO 14067 ฝ่ายจัดซื้อและฝ่ายความยั่งยืนจึงนำตัวเลขไปใช้ได้โดยไม่ต้องประมาณการเอง"
+    crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'ESG & คาร์บอน' }]}
+  />
+
+  <article>
+    <!-- ตัวเลขดิบ วางไว้บนสุดเพราะคนที่มาหน้านี้มาหาเลขนี้โดยตรง -->
+    <section class="mx-auto max-w-6xl px-4 py-14" aria-labelledby="numbers">
+      <p class="eyebrow">ตัวเลขที่ตรวจวัดแล้ว</p>
+      <h2 id="numbers" class="mt-3 text-2xl font-medium text-forest-900">
+        คาร์บอนฟุตพริ้นต์ต่อหลอด
+      </h2>
+
+      <dl class="mt-8 grid gap-5 sm:grid-cols-3">
+        {
+          PRODUCTS.map((p) => (
+            <div
+              class="border border-forest-200/70 bg-cream-100 p-6"
+              style="border-radius: var(--radius-sharp)"
+            >
+              <dt class="text-sm text-forest-700">หลอดชานอ้อย {p.shortName}</dt>
+              <dd class="index-num tabular mt-2 text-4xl text-forest-900">
+                {p.co2PerStraw}
+                <span class="ml-1.5 font-sans text-sm font-medium text-cane-600">g CO₂e</span>
+              </dd>
+              <dd class="mt-2 text-xs text-forest-600">ต่อหลอด · {p.dimensions}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <p class="mt-6 max-w-2xl text-sm text-forest-700/80">
+        ตัวเลขนี้คือค่าการปล่อยก๊าซเรือนกระจกตลอดวัฏจักรชีวิตของผลิตภัณฑ์
+        ตรวจวัดตามมาตรฐาน ISO 14067 (Product Carbon Footprint)
+        ต้องการไฟล์เอกสารรับรองสำหรับแนบรายงาน ติดต่อขอได้
+      </p>
+    </section>
+
+    <!-- เครื่องคิดเลข -->
+    <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="calc">
+      <div class="mx-auto max-w-4xl px-4 py-16">
+        <p class="eyebrow">เครื่องคำนวณ</p>
+        <h2 id="calc" class="mt-3 text-2xl font-medium text-forest-900">
+          ร้านคุณลด CO₂ ได้เท่าไหร่ต่อปี
+        </h2>
+        <p class="mt-3 max-w-2xl text-forest-800/85">
+          กรอกจำนวนแก้วที่ขายต่อวันและขนาดหลอดที่ใช้
+          ระบบจะคำนวณการปล่อยคาร์บอนตลอดปีจากหลอดของคุณ
+        </p>
+
+        <div
+          class="mt-8 border border-forest-200 bg-cream-50 p-6 sm:p-8"
+          style="border-radius: var(--radius-sharp)"
+          data-calc
+          data-co2={co2Map}
+        >
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="cups" class="block text-sm font-medium text-forest-900">
+                จำนวนแก้วต่อวัน
+              </label>
+              <input
+                type="number"
+                id="cups"
+                min="1"
+                max="1000000"
+                step="1"
+                value="300"
+                inputmode="numeric"
+                class="tabular mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
+                style="border-radius: var(--radius-sharp)"
+              />
+            </div>
+            <div>
+              <label for="size" class="block text-sm font-medium text-forest-900">ขนาดหลอดที่ใช้</label>
+              <select
+                id="size"
+                class="mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
+                style="border-radius: var(--radius-sharp)"
+              >
+                {
+                  PRODUCTS.map((p) => (
+                    <option value={p.size}>
+                      {p.shortName} — {p.useCase}
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label for="days" class="block text-sm font-medium text-forest-900">
+                เปิดร้านกี่วันต่อสัปดาห์
+              </label>
+              <select
+                id="days"
+                class="mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
+                style="border-radius: var(--radius-sharp)"
+              >
+                <option value="7">7 วัน — เปิดทุกวัน</option>
+                <option value="6">6 วัน</option>
+                <option value="5">5 วัน — จันทร์ถึงศุกร์</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tick-rule my-8 text-forest-700"></div>
+
+          <!-- ผลลัพธ์: อัปเดตทันทีที่พิมพ์ ไม่ต้องกดปุ่ม
+               aria-live ให้ screen reader อ่านค่าใหม่เมื่อเปลี่ยน -->
+          <div aria-live="polite">
+            <p class="text-sm text-forest-700">หลอดที่ใช้ต่อปี</p>
+            <p class="tabular index-num mt-1 text-3xl text-forest-900">
+              <span data-out="straws">—</span>
+              <span class="ml-1.5 font-sans text-base font-medium text-forest-600">ชิ้น</span>
+            </p>
+
+            <p class="mt-6 text-sm text-forest-700">คาร์บอนฟุตพริ้นต์จากหลอดตลอดปี</p>
+            <p class="tabular index-num mt-1 text-5xl text-forest-900">
+              <span data-out="kg">—</span>
+              <span class="ml-1.5 font-sans text-lg font-medium text-cane-600">กก. CO₂e</span>
+            </p>
+
+            <div class="mt-8 grid gap-5 sm:grid-cols-2">
+              <div class="border-l-2 border-cane-500 pl-4">
+                <p class="text-sm text-forest-700">เทียบเท่าการขับรถยนต์</p>
+                <p class="tabular mt-1 text-xl font-semibold text-forest-900">
+                  <span data-out="km">—</span> กม.
+                </p>
+              </div>
+              <div class="border-l-2 border-cane-500 pl-4">
+                <p class="text-sm text-forest-700">ต้องปลูกต้นไม้ดูดซับกลับ</p>
+                <p class="tabular mt-1 text-xl font-semibold text-forest-900">
+                  <span data-out="trees">—</span> ต้น (1 ปี)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ที่มาของตัวหาร ต้องแสดงให้เห็น ไม่ใช่ซ่อนไว้
+               ฝ่ายตรวจสอบ ESG จะถามหาที่มาเสมอ ถ้าไม่มีจะใช้ตัวเลขเราไม่ได้ -->
+          <p class="mt-7 text-xs leading-relaxed text-forest-600">
+            วิธีคิด: จำนวนหลอดต่อปี × ค่า CO₂e ต่อหลอดตาม ISO 14067 ของขนาดที่เลือก ·
+            เทียบเท่าการขับรถใช้ค่าเฉลี่ยรถยนต์นั่งส่วนบุคคล 0.12 กก. CO₂e ต่อกิโลเมตร ·
+            การดูดซับของต้นไม้ใช้ค่าประมาณ 21 กก. CO₂ ต่อต้นต่อปี
+            ตัวเลขสองค่าหลังเป็นค่าอ้างอิงสากลใช้เพื่อให้เห็นภาพ
+            ไม่ใช่ค่าที่ผ่านการตรวจรับรอง — ในรายงานที่มีผู้ตรวจสอบ ให้ใช้ค่า CO₂e ต่อหลอดโดยตรง
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- เอาไปใช้ยังไง — ลดแรงเสียดทานของฝ่ายจัดซื้อ -->
+    <section class="mx-auto max-w-3xl px-4 py-16" aria-labelledby="use">
+      <p class="eyebrow">นำไปใช้</p>
+      <h2 id="use" class="mt-3 text-2xl font-medium text-forest-900">
+        นำตัวเลขนี้ไปใช้ในรายงานอย่างไร
+      </h2>
+      <p class="mt-5 text-forest-800/90">
+        ตัวเลข ISO 14067 เป็นค่าต่อหน่วยผลิตภัณฑ์ จึงนำไปคูณกับปริมาณที่องค์กรใช้จริง
+        เพื่อรายงานใน Scope 3 หมวดสินค้าและบริการที่จัดซื้อได้โดยตรง
+        ต้องการเอกสารรับรองฉบับจริงเพื่อแนบประกอบ ติดต่อขอได้ทาง LINE
+      </p>
+
+      <dl class="mt-8 divide-y divide-forest-200/70 border-y border-forest-200/70">
+        <div class="py-5">
+          <dt class="font-medium text-forest-900">ระบุแหล่งที่มาของค่าอย่างไร</dt>
+          <dd class="mt-2 text-forest-800/85">
+            อ้างอิงว่าเป็นค่าคาร์บอนฟุตพริ้นต์ผลิตภัณฑ์ที่ตรวจวัดตาม ISO 14067
+            พร้อมระบุขนาดหลอดที่ใช้ เพราะค่าต่างกันตามขนาด
+          </dd>
+        </div>
+        <div class="py-5">
+          <dt class="font-medium text-forest-900">ทำไมค่าของหลอด 12 มม. สูงกว่า</dt>
+          <dd class="mt-2 text-forest-800/85">
+            เพราะใช้วัสดุต่อหลอดมากกว่าตามขนาดที่ใหญ่ขึ้น
+            การเลือกขนาดให้พอดีกับเมนูจึงลดคาร์บอนได้จริงโดยไม่ต้องเปลี่ยนอย่างอื่น
+          </dd>
+        </div>
+        <div class="py-5">
+          <dt class="font-medium text-forest-900">ต่างจากการเคลมว่า "ย่อยสลายได้" อย่างไร</dt>
+          <dd class="mt-2 text-forest-800/85">
+            การย่อยสลายได้บอกว่าเกิดอะไรขึ้นหลังทิ้ง ส่วนคาร์บอนฟุตพริ้นต์บอกว่าใช้พลังงานเท่าไหร่กว่าจะได้มา
+            รายงาน ESG ที่ครบต้องมีทั้งสองด้าน ซึ่งหลอดชานอ้อยมีเอกสารทั้งคู่
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- upcycle: เรื่องเล่าที่ทำให้ตัวเลขมีความหมาย -->
+    <section class="border-t border-forest-200/60 bg-cream-100" aria-labelledby="upcycle">
+      <div class="mx-auto max-w-3xl px-4 py-16">
+        <p class="eyebrow">ที่มาของวัสดุ</p>
+        <h2 id="upcycle" class="mt-3 text-2xl font-medium text-forest-900">
+          ชานอ้อยคือของเหลือ ไม่ใช่พืชที่ปลูกเพื่อทำหลอด
+        </h2>
+        <p class="mt-5 text-forest-800/90">
+          ชานอ้อยคือกากที่เหลือจากการหีบน้ำตาล เป็นของที่เกิดขึ้นอยู่แล้วจากอุตสาหกรรมน้ำตาล
+          และเดิมส่วนหนึ่งถูกกำจัดทิ้ง การนำมาขึ้นรูปเป็นหลอดจึงเป็นการใช้ประโยชน์จากของเหลือ
+          ไม่ได้เพิ่มพื้นที่เพาะปลูกใหม่เพื่อผลิตภาชนะ
+        </p>
+        <p class="mt-5 text-forest-800/90">
+          จุดนี้ต่างจากพลาสติกชีวภาพบางชนิดที่ใช้พืชอาหารเป็นวัตถุดิบตั้งต้นโดยตรง
+          ซึ่งเป็นประเด็นที่คณะกรรมการความยั่งยืนขององค์กรมักตั้งคำถาม
+        </p>
+
+        <p class="mt-8">
+          <a
+            href="/certifications/"
+            class="border-b-2 border-cane-500 pb-1 font-semibold text-forest-800 hover:border-forest-800"
+          >
+            ดูใบรับรองทั้งหมด รวม ISO 14067 และ TUV Home Compost
+          </a>
+        </p>
+      </div>
+    </section>
+  </article>
+
+  <CtaBand
+    heading="ขอเอกสารรับรองสำหรับฝ่ายจัดซื้อ"
+    sub="ส่งไฟล์ใบรับรอง ISO 14067 และ TUV Home Compost ให้แนบรายงานได้ พร้อมตัวอย่างสินค้าฟรี"
+  />
+</Base>
+
+<script>
+  /// เครื่องคิดเลขคาร์บอน — vanilla ล้วน ไม่มี framework
+  /// ถ้าเบราว์เซอร์ปิด JS ช่องกรอกยังอยู่ แต่ผลลัพธ์ค้างที่ "—" ซึ่งยอมรับได้
+  /// เพราะตัวเลข CO₂ ต่อหลอดที่เป็นสาระสำคัญ แสดงเป็น HTML ไว้ด้านบนแล้ว
+  const root = document.querySelector<HTMLElement>('[data-calc]');
+
+  if (root) {
+    /// ค่า CO₂ ต่อหลอดส่งมาจาก products.ts ไม่ได้พิมพ์ซ้ำในนี้
+    const co2: Record<string, number> = JSON.parse(root.dataset.co2 ?? '{}');
+
+    const cups = root.querySelector<HTMLInputElement>('#cups')!;
+    const size = root.querySelector<HTMLSelectElement>('#size')!;
+    const days = root.querySelector<HTMLSelectElement>('#days')!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+
+    /// ตัวหารสำหรับ "เทียบเท่า" — ที่มาแสดงไว้ในหน้าเว็บใต้เครื่องคิดเลขแล้ว
+    const KG_CO2_PER_KM = 0.12; // รถยนต์นั่งส่วนบุคคลโดยเฉลี่ย
+    const KG_CO2_PER_TREE_YEAR = 21; // ต้นไม้ดูดซับต่อต้นต่อปี
+
+    const fmt = (n: number, digits = 0) =>
+      n.toLocaleString('th-TH', { maximumFractionDigits: digits });
+
+    function update() {
+      /// กันค่าติดลบและค่าว่าง — ผู้ใช้ลบตัวเลขทิ้งกลางคันได้เสมอ
+      const perDay = Math.max(0, Number(cups.value) || 0);
+      const perWeek = Number(days.value);
+      const gramsPerStraw = co2[size.value] ?? 0;
+
+      /// 52 สัปดาห์ต่อปี — ตรงไปตรงมากว่าคูณ 365 แล้วหารวันหยุด
+      const straws = Math.round(perDay * perWeek * 52);
+      const kg = (straws * gramsPerStraw) / 1000;
+
+      out('straws').textContent = fmt(straws);
+      out('kg').textContent = fmt(kg, 1);
+      out('km').textContent = fmt(kg / KG_CO2_PER_KM);
+      out('trees').textContent = fmt(Math.ceil(kg / KG_CO2_PER_TREE_YEAR));
+    }
+
+    /// input จับการพิมพ์ ส่วน change จับ dropdown — ผูกทั้งคู่กับทุกช่องไปเลย
+    [cups, size, days].forEach((el) => {
+      el.addEventListener('input', update);
+      el.addEventListener('change', update);
+    });
+
+    update();
+  }
+</script>

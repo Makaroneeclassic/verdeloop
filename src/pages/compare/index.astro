@@ -1,17 +1,359 @@
 ---
-import Stub from '../_Stub.astro';
+import Base from '../../layouts/Base.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHead from '../../components/PageHead.astro';
+import { PRODUCTS, SITE } from '../../data/products';
+
+/// หน้า SEO ตัวหลักของเว็บ — คำว่า "หลอดชานอ้อย vs หลอดกระดาษ" คือสิ่งที่คนค้นก่อนตัดสินใจซื้อ
+///
+/// ⚠️ กฎการเขียนหน้านี้: ห้ามใส่ตัวเลขที่ยังไม่ได้ยืนยันจากฝ่ายผลิต
+/// (แช่ได้กี่ชั่วโมง / ย่อยสลายกี่วัน / ความหนาผนัง / ราคาต่อชิ้น)
+/// เพราะเป็นหน้าที่ฝ่ายจัดซื้อเอาไปเทียบกับใบเสนอราคาจริง ตัวเลขผิด = เสียลูกค้าถาวร
+/// สิ่งที่ยืนยันได้แล้วมีแค่: โครงสร้างวัสดุ · เงื่อนไขการย่อยสลาย · ใบรับรอง · ตัวเลข CO₂ ISO 14067
+const title = 'เทียบหลอดชานอ้อย vs หลอดกระดาษ vs หลอด PLA แบบไหนดีกว่ากัน';
+const description =
+  'เปรียบเทียบหลอดชานอ้อย หลอดกระดาษ และหลอด PLA ทั้งความทนน้ำ การย่อยสลาย วิธีทิ้ง และใบรับรอง พร้อมอธิบายความต่างระหว่าง Home Compostable กับ Industrial Compostable ที่ทำให้ทิ้งไม่เหมือนกัน';
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'เทียบกับหลอดอื่น', item: `${SITE.url}/compare/` },
+    ],
+  },
+];
+
+/// ตารางเทียบ — เก็บเป็นข้อมูลแทนการเขียน <td> มือ จะได้ไม่หลุดคอลัมน์เวลาแก้
+/// verdict บอกว่าช่องไหนคือข้อได้เปรียบจริง ใช้ทำตัวหนา ไม่ใช่ระบายสีเขียวทุกช่องของเราเอง
+const rows: { label: string; cane: string; paper: string; pla: string; win?: 'cane' | 'none' }[] = [
+  {
+    label: 'วัตถุดิบ',
+    cane: 'ชานอ้อยเหลือทิ้งจากการเกษตร',
+    paper: 'เยื่อกระดาษ + กาว',
+    pla: 'พลาสติกชีวภาพจากพืช (มักเป็นข้าวโพด)',
+    win: 'none',
+  },
+  {
+    label: 'โครงสร้างหลอด',
+    cane: 'เส้นใยขึ้นรูปเป็นเนื้อเดียวทั้งเส้น',
+    paper: 'กระดาษม้วนซ้อนกันหลายชั้นแล้วทากาว',
+    pla: 'พลาสติกรีดขึ้นรูปเป็นเนื้อเดียว',
+    win: 'cane',
+  },
+  {
+    label: 'แช่ในเครื่องดื่มเย็น',
+    cane: 'ไม่เปื่อยยุ่ย ไม่คลายเป็นชั้น',
+    paper: 'นิ่มและคลายตัวตามแนวกาว',
+    pla: 'ไม่เปื่อย',
+    win: 'cane',
+  },
+  {
+    label: 'เครื่องดื่มร้อน',
+    cane: 'ทนความร้อนได้',
+    paper: 'เปื่อยเร็วกว่าเดิมมาก',
+    pla: 'อ่อนตัวและเสียรูป (PLA ทนร้อนต่ำ)',
+    win: 'cane',
+  },
+  {
+    label: 'รสและกลิ่น',
+    cane: 'ไม่ทิ้งรสกระดาษในเครื่องดื่ม',
+    paper: 'มักมีกลิ่นและรสกระดาษ',
+    pla: 'ไม่มีรส',
+    win: 'none',
+  },
+  {
+    label: 'ย่อยสลายที่บ้าน / กองปุ๋ยหมัก',
+    cane: 'ได้ — TUV Austria Home Compost',
+    paper: 'ได้ ถ้าไม่เคลือบพลาสติก',
+    pla: 'ไม่ได้',
+    win: 'cane',
+  },
+  {
+    label: 'ต้องส่งโรงงานอุตสาหกรรมไหม',
+    cane: 'ไม่ต้อง',
+    paper: 'ไม่ต้อง',
+    pla: 'ต้อง — ต้องการอุณหภูมิสูงราว 55–60°C',
+    win: 'cane',
+  },
+  {
+    label: 'ทิ้งอย่างไรที่ร้าน',
+    cane: 'ทิ้งรวมกับเศษอาหารได้',
+    paper: 'ทิ้งรวมกับเศษอาหารได้',
+    pla: 'ต้องแยกส่งโรงงาน — ทิ้งถังทั่วไปจะกลายเป็นขยะฝังกลบ',
+    win: 'cane',
+  },
+  {
+    label: 'คาร์บอนฟุตพริ้นต์ที่ตรวจวัดแล้ว',
+    cane: 'มีตัวเลขรับรอง ISO 14067 ทุกขนาด',
+    paper: 'แล้วแต่ผู้ผลิต ส่วนใหญ่ไม่เปิดเผย',
+    pla: 'แล้วแต่ผู้ผลิต ส่วนใหญ่ไม่เปิดเผย',
+    win: 'cane',
+  },
+  {
+    label: 'ใช้อ้างอิงในรายงาน ESG',
+    cane: 'ได้ มีเอกสารรับรองให้ฝ่ายจัดซื้อ',
+    paper: 'ยาก ถ้าไม่มีเอกสารตรวจวัด',
+    pla: 'ต้องระบุด้วยว่าปลายทางมีโรงงานรองรับจริงหรือไม่',
+    win: 'cane',
+  },
+];
 ---
 
-<Stub
-  title="เทียบหลอดชานอ้อย vs หลอดกระดาษ vs หลอด PLA"
-  description="เปรียบเทียบหลอดชานอ้อย หลอดกระดาษ และหลอด PLA ทั้งความทนทาน การย่อยสลาย รสชาติ และต้นทุน พร้อมอธิบายความต่างของ Home Compostable กับ Industrial Compostable"
-  heading="เทียบหลอดชานอ้อย vs กระดาษ vs PLA"
-  intro="หน้านี้จะเป็นหน้าหลักที่ดึงคนเข้าเว็บจาก Google เพราะเป็นคำถามที่ผู้ซื้อค้นหาก่อนตัดสินใจเสมอ"
-  outline={[
-    'ตารางเทียบเต็ม 12 หัวข้อ: ความทนทาน รสชาติ กลิ่น การย่อยสลาย ต้นทุน ภาพลักษณ์',
-    'อธิบายความต่าง Home Compostable กับ Industrial Compostable แบบเข้าใจง่าย — จุดที่ PLA แพ้',
-    'ทำไมหลอดกระดาษถึงเปื่อย: เพราะเป็นกระดาษม้วนทากาว ไม่ใช่เส้นใยขึ้นรูปทั้งเส้น',
-    'ตารางเทียบต้นทุนต่อแก้ว รวมต้นทุนแฝงจากลูกค้าบ่นและการเปลี่ยนหลอดกลางแก้ว',
-    'สรุปว่าร้านแบบไหนควรเลือกอะไร',
-  ]}
-/>
+<Base {title} {description} {schema}>
+  <PageHead
+    eyebrow="เทียบวัสดุ"
+    heading="หลอดชานอ้อย vs หลอดกระดาษ vs หลอด PLA"
+    intro="ทั้งสามแบบเรียกตัวเองว่ารักษ์โลกเหมือนกัน แต่ต่างกันตรงโครงสร้างของหลอดและเงื่อนไขการย่อยสลาย ซึ่งเป็นสองเรื่องที่มีผลกับหน้าร้านคุณโดยตรง"
+    crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'เทียบกับหลอดอื่น' }]}
+  />
+
+  <article>
+    <!-- สรุปให้ก่อนตาราง — คนอ่านบนมือถือส่วนใหญ่ไม่เลื่อนตารางแนวนอน -->
+    <section class="mx-auto max-w-3xl px-4 py-14" aria-labelledby="summary">
+      <h2 id="summary" class="text-2xl font-medium text-forest-900">สรุปสั้นก่อนเข้าเรื่อง</h2>
+      <div class="mt-6 space-y-5 text-lg text-forest-800/90">
+        <p>
+          <strong class="font-semibold text-forest-900">หลอดกระดาษเปื่อย</strong>
+          เพราะมันคือกระดาษหลายแผ่นม้วนซ้อนกันแล้วยึดด้วยกาว พอแช่น้ำนาน ๆ ชั้นกาวจะคลาย
+          หลอดเลยนิ่มและแยกชั้น — เป็นเรื่องของโครงสร้าง ไม่ใช่เรื่องคุณภาพของยี่ห้อ
+        </p>
+        <p>
+          <strong class="font-semibold text-forest-900">หลอด PLA ไม่เปื่อยก็จริง แต่ปัญหาอยู่ที่ตอนทิ้ง</strong>
+          PLA ย่อยสลายได้เฉพาะในโรงงานหมักปุ๋ยอุตสาหกรรมที่ควบคุมอุณหภูมิสูง
+          ถ้าทิ้งลงถังขยะทั่วไปหรือกองปุ๋ยหลังร้าน มันจะอยู่แบบนั้นเหมือนพลาสติก
+        </p>
+        <p>
+          <strong class="font-semibold text-forest-900">หลอดชานอ้อย</strong>
+          ขึ้นรูปจากเส้นใยเป็นเนื้อเดียวทั้งเส้น จึงไม่มีชั้นกาวให้คลาย
+          และผ่านการรับรอง Home Compost คือย่อยสลายเองได้โดยไม่ต้องพึ่งโรงงาน
+        </p>
+      </div>
+    </section>
+
+    <!-- ตารางเทียบเต็ม -->
+    <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="table">
+      <div class="mx-auto max-w-6xl px-4 py-16">
+        <p class="eyebrow">ตารางเทียบ</p>
+        <h2 id="table" class="mt-3 text-2xl font-medium text-forest-900">เทียบทีละหัวข้อ</h2>
+        <p class="mt-3 max-w-2xl text-forest-800/85">
+          ตัวหนาคือช่องที่ต่างกันจนมีผลกับการทำงานหน้าร้านจริง ไม่ใช่ต่างกันแค่บนกระดาษ
+        </p>
+
+        <div class="mt-8 overflow-x-auto">
+          <table class="w-full min-w-[720px] border-collapse text-left align-top">
+            <caption class="sr-only">
+              ตารางเปรียบเทียบหลอดชานอ้อย หลอดกระดาษ และหลอด PLA รายหัวข้อ
+            </caption>
+            <thead>
+              <tr class="border-b-2 border-forest-300">
+                <th scope="col" class="w-52 pb-3 text-[0.7rem] tracking-[0.14em] text-forest-600 uppercase">
+                  หัวข้อ
+                </th>
+                <th scope="col" class="px-4 pb-3 text-sm font-semibold text-forest-900">
+                  หลอดชานอ้อย
+                  <span class="mt-0.5 block text-[0.7rem] font-normal text-cane-600">Verdeloop</span>
+                </th>
+                <th scope="col" class="px-4 pb-3 text-sm font-semibold text-forest-800">หลอดกระดาษ</th>
+                <th scope="col" class="px-4 pb-3 text-sm font-semibold text-forest-800">หลอด PLA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                rows.map((r) => (
+                  <tr class="border-b border-forest-200/70">
+                    <th scope="row" class="py-4 pr-4 text-left text-sm font-medium text-forest-700">
+                      {r.label}
+                    </th>
+                    <td
+                      class:list={[
+                        'px-4 py-4 text-sm text-forest-900',
+                        r.win === 'cane' && 'font-semibold',
+                      ]}
+                    >
+                      {r.cane}
+                    </td>
+                    <td class="px-4 py-4 text-sm text-forest-700/85">{r.paper}</td>
+                    <td class="px-4 py-4 text-sm text-forest-700/85">{r.pla}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="mt-5 text-sm text-forest-700/75">
+          หมายเหตุ: หลอดกระดาษและ PLA มีหลายเกรดจากหลายผู้ผลิต
+          ตารางนี้อธิบายคุณสมบัติตามชนิดวัสดุ ไม่ได้เจาะจงยี่ห้อใดยี่ห้อหนึ่ง
+        </p>
+      </div>
+    </section>
+
+    <!-- หัวใจของหน้านี้ — จุดที่ PLA เลียนแบบไม่ได้ -->
+    <section class="mx-auto max-w-3xl px-4 py-16" aria-labelledby="compost">
+      <p class="eyebrow">เรื่องที่คนเข้าใจผิดบ่อยที่สุด</p>
+      <h2 id="compost" class="mt-3 text-2xl font-medium text-forest-900">
+        Home Compostable กับ Industrial Compostable ต่างกันอย่างไร
+      </h2>
+      <p class="mt-5 text-forest-800/90">
+        สองคำนี้แปลเป็นไทยได้ว่า "ย่อยสลายได้" เหมือนกัน แต่เงื่อนไขต่างกันคนละเรื่อง
+        และความต่างนี้คือสิ่งที่กำหนดว่าหลอดที่ร้านคุณใช้จะย่อยสลายจริงหรือกลายเป็นขยะฝังกลบ
+      </p>
+
+      <div class="mt-9 grid gap-6 sm:grid-cols-2">
+        <div
+          class="border-l-2 border-cane-500 bg-cream-100 p-6"
+          style="border-radius: 0 var(--radius-sharp) var(--radius-sharp) 0"
+        >
+          <p class="text-[0.7rem] font-semibold tracking-[0.14em] text-cane-600 uppercase">
+            Home Compostable
+          </p>
+          <p class="mt-3 font-medium text-forest-900">ย่อยสลายเองได้ในสภาพแวดล้อมทั่วไป</p>
+          <p class="mt-3 text-sm text-forest-800/85">
+            ไม่ต้องการอุณหภูมิสูงเป็นพิเศษ ทิ้งรวมกับเศษอาหารหรือกองปุ๋ยหลังร้านได้เลย
+            เป็นมาตรฐานที่ผ่านยากกว่า เพราะต้องพิสูจน์ว่าย่อยสลายได้โดยไม่ต้องพึ่งเครื่องมือใด ๆ
+          </p>
+          <p class="mt-4 text-sm font-semibold text-forest-900">หลอดชานอ้อย Verdeloop อยู่กลุ่มนี้</p>
+        </div>
+
+        <div
+          class="border-l-2 border-forest-300 bg-cream-100 p-6"
+          style="border-radius: 0 var(--radius-sharp) var(--radius-sharp) 0"
+        >
+          <p class="text-[0.7rem] font-semibold tracking-[0.14em] text-forest-600 uppercase">
+            Industrial Compostable
+          </p>
+          <p class="mt-3 font-medium text-forest-900">ย่อยสลายได้เฉพาะในโรงงานเท่านั้น</p>
+          <p class="mt-3 text-sm text-forest-800/85">
+            ต้องการโรงงานหมักปุ๋ยที่ควบคุมอุณหภูมิราว 55–60°C ความชื้น และการกลับกอง
+            ซึ่งประเทศไทยยังมีไม่ทั่วถึง ถ้าไม่ได้ส่งเข้าโรงงานจริง ผลลัพธ์ปลายทางไม่ต่างจากพลาสติก
+          </p>
+          <p class="mt-4 text-sm font-semibold text-forest-900">หลอด PLA อยู่กลุ่มนี้</p>
+        </div>
+      </div>
+
+      <p class="mt-8 text-forest-800/90">
+        ประเด็นจึงไม่ใช่ว่า PLA ไม่ดี แต่คือ
+        <strong class="font-semibold text-forest-900">
+          PLA จะทำงานได้ตามที่โฆษณาก็ต่อเมื่อมีระบบเก็บขยะแยกไปโรงงานรองรับ
+        </strong>
+        ถ้าร้านคุณทิ้งหลอดลงถังเดียวกับขยะทั่วไป — ซึ่งเป็นสิ่งที่เกิดขึ้นจริงเกือบทุกร้าน —
+        การจ่ายแพงขึ้นเพื่อ PLA จะไม่ได้ผลลัพธ์ด้านสิ่งแวดล้อมอย่างที่ตั้งใจไว้
+      </p>
+    </section>
+
+    <!-- ทำไมกระดาษถึงเปื่อย -->
+    <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="why-paper">
+      <div class="mx-auto max-w-3xl px-4 py-16">
+        <p class="eyebrow">อธิบายเชิงโครงสร้าง</p>
+        <h2 id="why-paper" class="mt-3 text-2xl font-medium text-forest-900">
+          ทำไมหลอดกระดาษถึงเปื่อย แต่หลอดชานอ้อยไม่เป็น
+        </h2>
+        <p class="mt-5 text-forest-800/90">
+          หลอดกระดาษผลิตด้วยการนำกระดาษเป็นแถบมาม้วนเป็นเกลียวซ้อนกันหลายชั้น
+          แล้วยึดแต่ละชั้นไว้ด้วยกาว ความแข็งแรงของหลอดจึงมาจากกาว ไม่ได้มาจากตัวกระดาษ
+          เมื่อแช่น้ำนานพอ กาวจะอ่อนตัว ชั้นกระดาษเริ่มแยกจากกัน หลอดจึงนิ่มและยุบ
+          ซึ่งเป็นเหตุผลว่าทำไมหลอดกระดาษถึงมักเปื่อยตามแนวเกลียว
+        </p>
+        <p class="mt-5 text-forest-800/90">
+          หลอดชานอ้อยไม่ได้ผลิตแบบนั้น แต่ใช้วิธีนำเส้นใยมาขึ้นรูปเป็นตัวหลอดทั้งเส้นในครั้งเดียว
+          จึงไม่มีรอยต่อและไม่มีชั้นกาวให้คลาย นี่คือเหตุผลเชิงโครงสร้างที่ทำให้มันแช่อยู่ในแก้วได้
+          โดยไม่แยกชั้น ไม่ใช่เพราะเคลือบสารกันน้ำเพิ่ม
+        </p>
+
+        <p class="mt-8">
+          <a
+            href="/paper-straw-problem/"
+            class="border-b-2 border-cane-500 pb-1 font-semibold text-forest-800 hover:border-forest-800"
+          >
+            อ่านต่อ: ปัญหาหลอดกระดาษเปื่อยส่งผลกับร้านอย่างไร
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ตัวเลข CO2 — ของจริงที่มีเอกสาร -->
+    <section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="co2">
+      <p class="eyebrow">ตัวเลขที่ตรวจวัดแล้ว</p>
+      <h2 id="co2" class="mt-3 text-2xl font-medium text-forest-900">
+        คาร์บอนฟุตพริ้นต์ที่มีเอกสารรับรอง
+      </h2>
+      <p class="mt-3 max-w-2xl text-forest-800/85">
+        หลอดทุกขนาดผ่านการตรวจวัดตามมาตรฐาน ISO 14067
+        ฝ่ายจัดซื้อจึงนำตัวเลขไปใช้ในรายงานความยั่งยืนขององค์กรได้โดยตรง
+        ไม่ต้องประมาณการเอง
+      </p>
+
+      <dl class="mt-8 grid gap-5 sm:grid-cols-3">
+        {
+          PRODUCTS.map((p) => (
+            <div
+              class="border border-forest-200/70 bg-cream-100 p-6"
+              style="border-radius: var(--radius-sharp)"
+            >
+              <dt class="text-sm text-forest-700">หลอด {p.shortName}</dt>
+              <dd class="index-num tabular mt-2 text-4xl text-forest-900">
+                {p.co2PerStraw}
+                <span class="ml-1.5 font-sans text-sm font-medium text-cane-600">g CO₂e</span>
+              </dd>
+              <dd class="mt-2 text-xs text-forest-600">ต่อหลอด · ISO 14067</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <p class="mt-8">
+        <a
+          href="/esg/"
+          class="border-b-2 border-cane-500 pb-1 font-semibold text-forest-800 hover:border-forest-800"
+        >
+          คำนวณว่าร้านคุณลด CO₂ ได้เท่าไหร่ต่อปี
+        </a>
+      </p>
+    </section>
+
+    <!-- สรุปว่าใครควรเลือกอะไร — จบด้วยคำแนะนำ ไม่ใช่ปล่อยให้คิดเอง -->
+    <section class="border-t border-forest-200/60 bg-cream-100" aria-labelledby="pick">
+      <div class="mx-auto max-w-3xl px-4 py-16">
+        <p class="eyebrow">สรุป</p>
+        <h2 id="pick" class="mt-3 text-2xl font-medium text-forest-900">แล้วร้านแบบไหนควรเลือกอะไร</h2>
+
+        <dl class="mt-7 divide-y divide-forest-200/70 border-y border-forest-200/70">
+          <div class="py-5">
+            <dt class="font-medium text-forest-900">ร้านที่เคยโดนลูกค้าบ่นเรื่องหลอดเปื่อย</dt>
+            <dd class="mt-2 text-forest-800/85">
+              เปลี่ยนมาใช้ชานอ้อย เพราะแก้ที่ต้นเหตุคือโครงสร้างหลอด
+              การเปลี่ยนยี่ห้อหลอดกระดาษไม่ได้แก้ปัญหานี้
+            </dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-medium text-forest-900">ร้านชานมไข่มุกและเครื่องดื่มท็อปปิ้ง</dt>
+            <dd class="mt-2 text-forest-800/85">
+              ต้องใช้หลอด 12 มม. ที่ปากกว้างพอ และแข็งแรงพอจะเจาะฝาซีลได้โดยไม่ยับ
+            </dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-medium text-forest-900">องค์กรที่ต้องรายงาน ESG</dt>
+            <dd class="mt-2 text-forest-800/85">
+              เลือกวัสดุที่มีเอกสารตรวจวัดคาร์บอนจริงและระบุเงื่อนไขการย่อยสลายได้ชัด
+              ไม่งั้นตัวเลขในรายงานจะไม่มีที่มา
+            </dd>
+          </div>
+          <div class="py-5">
+            <dt class="font-medium text-forest-900">ร้านที่ยังไม่แน่ใจ</dt>
+            <dd class="mt-2 text-forest-800/85">
+              ขอตัวอย่างไปแช่ทิ้งไว้กับเครื่องดื่มที่ขายจริงของร้านก่อน
+              เป็นวิธีเดียวที่ตัดสินได้จริงโดยไม่ต้องเชื่อใคร
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  </article>
+
+  <CtaBand
+    heading="ลองเทียบเองกับเครื่องดื่มของร้านคุณ"
+    sub="ขอตัวอย่างฟรีไปแช่ทิ้งไว้ดูว่าเปื่อยไหม เทียบกับหลอดที่ใช้อยู่ตอนนี้"
+  />
+</Base>
