@@ -1,0 +1,17 @@
+---
+import LineButton from '../../../components/LineButton.astro';
+import {PRODUCTS,CONTACT} from '../../../data/products';
+export function getStaticPaths(){return [{params:{slug:'catalog'},props:{items:PRODUCTS}},...PRODUCTS.map(p=>({params:{slug:p.slug},props:{items:[p]}}))];}
+const {items}=Astro.props;
+---
+<!doctype html><html lang="th"><head><meta charset="utf-8"/><meta name="robots" content="noindex, nofollow"/><title>สเปกหลอดชานอ้อย Verdeloop</title><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style is:global>
+@page{size:A4;margin:16mm}*{box-sizing:border-box}body{font-family:'IBM Plex Sans Thai',sans-serif;color:#1b3025;margin:0;font-size:12px;line-height:1.7}header{border-bottom:2px solid #234734;padding-bottom:14px;display:flex;justify-content:space-between;align-items:end}h1{font-size:24px;margin:18px 0 8px}h2{font-size:19px;margin:12px 0 4px}.brand{font-size:28px;font-weight:600}.tag{font-size:11px;color:#7e6539}.product{break-inside:avoid;padding:12px 0;border-bottom:1px solid #d5dfd3;display:grid;grid-template-columns:100px 1fr;gap:20px}.product img{width:100px;height:130px;object-fit:contain}table{border-collapse:collapse;width:100%;margin-top:10px}td,th{padding:6px 8px;border:1px solid #d5dfd3;text-align:left}footer{margin-top:22px;color:#526a58;font-size:11px}.notes{margin-top:20px;background:#f3f5ef;padding:14px;border-radius:12px}p{margin:5px 0}a{color:inherit}
+</style></head><body>
+<header><div><div class="brand">Verdeloop</div><div class="tag">THAILAND · เอกสารข้อมูลสินค้า</div></div><div>ปรับปรุง 10 กันยายน 2569<br/>verdeloopthailand.com</div></header>
+<h1>{items.length>1?'สเปกหลอดชานอ้อยและบรรจุขายส่ง':`สเปกหลอดชานอ้อย ${items[0].shortName}`}</h1>
+<p>ทุกขนาดยาว 210 มม. ห่อซองกระดาษรายชิ้น</p>
+{items.map(p=><section class="product"><img src={p.images[0].src} alt={`หลอดชานอ้อย ${p.shortName}`}/><div><h2>{p.dimensions}</h2><p>{p.useCase}</p><p>{p.drinks.join(' · ')}</p><table><thead><tr><th>บรรจุ</th><th>จำนวนต่อกล่อง</th><th>แพค × ชิ้น</th></tr></thead><tbody>{p.packing.map(b=><tr><td>{b.label}</td><td>{b.pieces.toLocaleString('th-TH')} ชิ้น</td><td>{b.packs} × {b.perPack}</td></tr>)}</tbody></table></div></section>)}
+<div class="notes"><strong>การใช้งานและการสั่งซื้อ</strong><p>เก็บในที่แห้ง หลีกเลี่ยงแดด ความร้อน และความชื้น ทดลองกับเครื่องดื่ม แก้ว และฝาซีลของร้านก่อนสั่งจำนวนมาก สำหรับเมนูร้อนให้ยืนยันช่วงอุณหภูมิของรุ่นก่อนใช้</p><p>ราคาขายส่งและกำหนดส่งมอบ: ขอใบเสนอราคาตามขนาดและปริมาณที่ต้องการ</p><p>เอกสารนี้เป็นข้อมูลสินค้า หากต้องการใบรับรองหรือผลทดสอบฉบับเต็ม กรุณาขอจากทีมงานแยกต่างหาก</p></div>
+<footer><strong>{CONTACT.company}</strong><p>{CONTACT.address}</p><p>โทร {CONTACT.phone} · <LineButton /> · https://verdeloopthailand.com</p></footer>
+</body></html>

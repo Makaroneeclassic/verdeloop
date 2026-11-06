@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS staff_users (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),username text NOT NULL UNIQUE,display_name text NOT NULL,password_hash text NOT NULL,role text NOT NULL CHECK(role IN ('admin','sales','viewer')),active boolean NOT NULL DEFAULT true,session_version integer NOT NULL DEFAULT 1,created_at timestamptz NOT NULL DEFAULT now());
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS phone_key text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS assigned_to uuid REFERENCES staff_users(id);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS shipment jsonb DEFAULT '{}';
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS deal jsonb DEFAULT '{}';
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS qualified_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS closed_at timestamptz;
+ALTER TABLE lead_history ADD COLUMN IF NOT EXISTS details jsonb DEFAULT '{}';
+CREATE INDEX IF NOT EXISTS leads_phone_key_idx ON leads(phone_key);
+CREATE INDEX IF NOT EXISTS leads_assigned_idx ON leads(assigned_to,follow_up_at);
+CREATE TABLE IF NOT EXISTS integration_settings (key text PRIMARY KEY,encrypted text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS followup_reminders (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),lead_id bigint NOT NULL REFERENCES leads(id) ON DELETE CASCADE,scheduled_at timestamptz NOT NULL,status text NOT NULL DEFAULT 'pending',attempts integer NOT NULL DEFAULT 0,started_at timestamptz,locked_until timestamptz,sent_at timestamptz,error text,UNIQUE(lead_id,scheduled_at));
+CREATE TABLE IF NOT EXISTS ads_conversions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),lead_id bigint NOT NULL REFERENCES leads(id) ON DELETE CASCADE,kind text NOT NULL CHECK(kind IN ('qualified','won')),occurred_at timestamptz NOT NULL,payload jsonb NOT NULL,status text NOT NULL DEFAULT 'pending',attempts integer NOT NULL DEFAULT 0,locked_until timestamptz,sent_at timestamptz,error text,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(lead_id,kind));
+CREATE INDEX IF NOT EXISTS reminders_status_idx ON followup_reminders(status,scheduled_at);
+CREATE INDEX IF NOT EXISTS ads_status_idx ON ads_conversions(status,created_at);

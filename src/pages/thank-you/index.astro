@@ -10,8 +10,8 @@ const description = 'เราได้รับคำขอตัวอย่�
 ---
 
 <Base {title} {description} noindex>
-  <section class="bg-forest-900 text-cream-100">
-    <div class="mx-auto max-w-3xl px-4 pt-16 pb-20 text-center">
+  <section class="bg-gradient-to-br from-forest-800 to-forest-900 text-cream-100">
+    <div class="mx-auto max-w-3xl px-5 sm:px-6 pt-16 pb-20 text-center">
       <!-- เครื่องหมายถูกวาดเอง ไม่ใช้อีโมจิ — คุมสีให้เข้ากับแบรนด์ได้และไม่เพี้ยนข้ามระบบ -->
       <svg
         class="mx-auto h-14 w-14 text-cane-300"
@@ -34,42 +34,15 @@ const description = 'เราได้รับคำขอตัวอย่�
       </h1>
       <p class="mt-5 text-lg text-cream-200/85">
         ทีมขายจะโทรกลับยืนยันที่อยู่จัดส่งภายในวันทำการ
-        ถ้าต้องการเร่งด่วนกว่านั้น {CONTACT.phone ? 'โทรหรือทัก LINE' : 'ทัก LINE'} เข้ามาได้เลย
+        ถ้าต้องการเร่งด่วนกว่านั้น ทัก LINE เข้ามาได้เลย
       </p>
 
-      {/* ยังไม่มีเบอร์ → LINE ขึ้นมาเป็นปุ่มหลัก (พื้นครีม) แทน ไม่ใช่ปุ่มรองที่โดดเดี่ยว */}
-      <div class="mt-9 flex flex-wrap justify-center gap-3">
-        {
-          CONTACT.phone && (
-            <a
-              href={CONTACT.phoneHref}
-              data-track="phone"
-              class="bg-cream-50 px-6 py-3 font-semibold text-forest-900 transition hover:bg-cream-200"
-              style="border-radius: var(--radius-sharp)"
-            >
-              โทร {CONTACT.phone}
-            </a>
-          )
-        }
-        <a
-          href={CONTACT.lineUrl}
-          data-track="line"
-          class:list={[
-            'px-6 py-3 font-semibold transition',
-            CONTACT.phone
-              ? 'text-cream-50 ring-1 ring-cream-200/40 hover:bg-cream-50/10'
-              : 'bg-cream-50 text-forest-900 hover:bg-cream-200',
-          ]}
-          style="border-radius: var(--radius-sharp)"
-        >
-          ทัก LINE {CONTACT.lineId}
-        </a>
-      </div>
+
     </div>
   </section>
 
   <!-- ระหว่างรอสาย ให้อ่านอะไรต่อ — กันคนปิดแท็บทิ้งทันที -->
-  <section class="mx-auto max-w-4xl px-4 py-16">
+  <section class="mx-auto max-w-4xl px-5 sm:px-6 section-space-sm">
     <p class="eyebrow">ระหว่างรอเราติดต่อกลับ</p>
     <h2 class="mt-3 text-2xl font-medium text-forest-900">
       ข้อมูลที่ฝ่ายจัดซื้อมักขอดูต่อ
@@ -77,11 +50,9 @@ const description = 'เราได้รับคำขอตัวอย่�
 
     <ul class="mt-8 divide-y divide-forest-200/70 border-y border-forest-200/70">
       <li class="grid gap-1 py-5 sm:grid-cols-[14rem_1fr] sm:gap-8">
-        <a href="/certifications/" class="text-lg font-medium text-forest-900 hover:underline">
-          ใบรับรองทั้งหมด
-        </a>
+        <span class="text-lg font-medium text-forest-900">ขอใบรับรองฉบับจริง</span>
         <span class="text-forest-800/85">
-          TUV Home Compost, ISO 14067, PFAS Free และอีก 13 รายการ ดาวน์โหลดแนบเอกสารจัดซื้อได้
+          แจ้งขนาดสินค้าและใบรับรองที่ต้องการ ทีมงานจะส่งเอกสารฉบับจริงให้ทาง LINE
         </span>
       </li>
       <li class="grid gap-1 py-5 sm:grid-cols-[14rem_1fr] sm:gap-8">

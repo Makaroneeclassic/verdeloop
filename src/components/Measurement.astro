@@ -1,0 +1,27 @@
+---
+const ga = import.meta.env.PUBLIC_GA4_ID || '';
+const ads = import.meta.env.PUBLIC_GOOGLE_ADS_ID || '';
+const label = import.meta.env.PUBLIC_GOOGLE_ADS_LEAD_LABEL || '';
+---
+<div id="measurement-settings" data-ga={ga} data-ads={ads} data-label={label}>
+  <section id="measurement-banner" hidden aria-label="ตั้งค่าการวัดผล" class="measurement-banner">
+    <p><strong>ช่วยให้เราปรับปรุงเว็บไซต์</strong><br />อนุญาตให้วัดการเข้าชม การกดติดต่อ และแหล่งที่มาของโฆษณาหรือไม่? คุณยังใช้งานและส่งฟอร์มได้ตามปกติหากไม่อนุญาต <a href="/privacy/">อ่านรายละเอียด</a></p>
+    <div><button type="button" data-consent-accept>อนุญาตทั้งหมด</button><button type="button" data-consent-settings>ตั้งค่า</button></div>
+  </section>
+  <dialog id="measurement-dialog" class="consent-dialog" aria-labelledby="consent-title">
+    <div class="consent-dialog-head"><h2 id="consent-title">ตั้งค่าความเป็นส่วนตัว</h2><button type="button" id="consent-close" aria-label="ปิดการตั้งค่า">✕</button></div>
+    <p>เลือกได้แยกกัน เว็บไซต์และการส่งฟอร์มยังใช้งานได้แม้ปิดทั้งสองรายการ</p>
+    <p class="consent-necessary"><strong>การทำงานที่จำเป็น — เปิดเสมอ</strong><br/>ใช้ส่งฟอร์ม รักษาความปลอดภัย และจดจำตัวเลือกของคุณ</p>
+    <label class="consent-option"><input id="consent-analytics" type="checkbox"/><span><strong>การวัดผลเว็บไซต์</strong><br/>อนุญาตสถิติการเข้าชมและการกดติดต่อ รวมถึง Google Analytics เพื่อปรับปรุงเว็บไซต์</span></label>
+    <label class="consent-option"><input id="consent-ads" type="checkbox"/><span><strong>การวัดผลโฆษณา</strong><br/>อนุญาตเก็บรหัสคลิกและแหล่งที่มาของโฆษณา และส่งผลการส่งฟอร์ม การคลิก LINE การเพิ่มเพื่อนที่ยืนยันแล้ว และผลการขายไป Google Ads เพื่อวัดประสิทธิภาพ โดยไม่ส่งชื่อ เบอร์โทร หรืออีเมล</span></label>
+    <p><a href="/privacy/">อ่านนโยบายความเป็นส่วนตัว</a> · เปลี่ยนตัวเลือกได้ที่ “ตั้งค่าการวัดผล” ด้านล่างเว็บ</p>
+    <div class="consent-actions"><button type="button" id="consent-save">บันทึกการตั้งค่า</button><button type="button" id="consent-reject">ใช้เฉพาะที่จำเป็น</button></div>
+  </dialog>
+  <button id="measurement-preferences" type="button" class="measurement-preferences">ตั้งค่าการวัดผล</button>
+</div>
+<script is:inline src="/js/measurement.js?v=line-1" defer></script>
+<style is:global>
+.measurement-banner{position:fixed;bottom:18px;left:18px;right:18px;z-index:90;max-width:760px;margin:auto;padding:20px 24px;background:#fffdf8;border:1px solid #cbd8cc;border-radius:22px;box-shadow:0 12px 50px #18332325;color:#1b3025;font-size:14px;line-height:1.8}
+.measurement-banner[hidden]{display:none}.measurement-banner a{text-decoration:underline}.measurement-banner div{display:flex;gap:12px;margin-top:14px}.measurement-banner button{flex:1;padding:10px 18px;border:1px solid #385944;border-radius:999px;background:#eaf0e8;font-weight:600;cursor:pointer}.measurement-preferences{display:block;margin:0 auto 18px;font-size:12px;text-decoration:underline;color:#536d5c;cursor:pointer}.form-feedback{padding:14px 18px;background:#fff0e9;color:#833b23;border-radius:14px;margin-bottom:18px}
+.consent-dialog{margin:auto;width:min(560px,calc(100% - 32px));max-height:85svh;overflow:auto;padding:24px;border:1px solid #cbd8cc;border-radius:22px;background:#fffdf8;color:#1b3025;font-size:14px;line-height:1.8}.consent-dialog::backdrop{background:#132c2266}.consent-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.consent-dialog h2{font-size:20px;font-weight:600}.consent-dialog p{margin:12px 0}.consent-dialog a{text-decoration:underline}.consent-option{display:flex;align-items:start;gap:12px;padding:16px 0;border-top:1px solid #dbe4dc;cursor:pointer}.consent-option input{margin-top:6px;width:18px;height:18px;flex-shrink:0;accent-color:#385944}.consent-necessary{padding:12px;background:#edf2e9;border-radius:12px}.consent-actions{display:flex;gap:12px;flex-wrap:wrap}.consent-actions button{flex:1;min-width:150px;padding:10px 14px;border:1px solid #385944;border-radius:999px;background:#eaf0e8;font-weight:600}.consent-dialog-head button{padding:8px 12px}.consent-dialog :focus-visible{outline:3px solid #b58c47;outline-offset:3px}
+</style>

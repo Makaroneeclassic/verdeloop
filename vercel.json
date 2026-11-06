@@ -1,10 +1,103 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "astro",
-  "regions": ["sin1"],
+  "regions": [
+    "sin1"
+  ],
+  "redirects": [
+    {
+      "source": "/api/admin",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/sample",
+      "destination": "/sugarcane-straw/",
+      "permanent": true
+    },
+    {
+      "source": "/sample/",
+      "destination": "/sugarcane-straw/",
+      "permanent": true
+    },
+    {
+      "source": "/articles",
+      "destination": "/articles/",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/img/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/downloads/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/_astro/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/api/admin"
+    },
+    {
+      "source": "/articles/sitemap.xml",
+      "destination": "/api/articles?sitemap=1"
+    },
+    {
+      "source": "/articles/media/:id/",
+      "destination": "/api/articles?image=:id"
+    },
+    {
+      "source": "/articles/:slug/",
+      "destination": "/api/articles?slug=:slug"
+    },
+    {
+      "source": "/articles/:slug",
+      "destination": "/api/articles?slug=:slug"
+    },
+    {
+      "source": "/articles/",
+      "destination": "/api/articles"
+    }
+  ],
   "functions": {
     "api/lead.js": {
       "maxDuration": 30
+    },
+    "api/maintenance.js": {
+      "maxDuration": 60
+    },
+    "api/admin.js": {
+      "maxDuration": 180,
+      "includeFiles": "public/img/verdeloop-wordmark.svg"
+    },
+    "api/articles.js": {
+      "maxDuration": 30,
+      "includeFiles": "lib/generated/article-shell.html"
+    },
+    "api/line-login.js": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/maintenance",
+      "schedule": "0 23 * * *"
+    }
+  ]
 }

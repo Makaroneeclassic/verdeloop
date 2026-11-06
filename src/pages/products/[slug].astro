@@ -1,7 +1,9 @@
 ---
+import LineButton from '../../components/LineButton.astro';
 import Base from '../../layouts/Base.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import PageHead from '../../components/PageHead.astro';
+import { PRODUCT_GUIDES } from '../../data/product-guides';
 import { CERTIFICATIONS, CONTACT, PRODUCTS, SITE } from '../../data/products';
 
 export function getStaticPaths() {
@@ -14,7 +16,8 @@ export function getStaticPaths() {
 const { product: p } = Astro.props;
 const others = PRODUCTS.filter((x) => x.slug !== p.slug);
 
-const title = `หลอดชานอ้อย ${p.shortName} (${p.dimensions}) ไม่เปื่อยยุ่ย ราคาส่ง`;
+const guide = PRODUCT_GUIDES[p.slug];
+const title = guide.title;
 
 const url = `${SITE.url}/products/${p.slug}/`;
 
@@ -65,42 +68,42 @@ const specs = [
 ---
 
 <!-- ภาพแชร์ใช้การ์ดที่ประกอบไว้ ไม่ใช่ p.images[0] ซึ่งพื้นโปร่งใส — LINE จะเรนเดอร์พื้นใสเป็นสีดำ -->
-<Base title={title} description={p.metaDescription} image={`/img/og/og-${p.slug}.jpg`} {schema}>
+<Base
+  title={title}
+  description={p.metaDescription}
+  image={`/img/og/og-${p.slug}.jpg`}
+  preload={{ src: p.images[0].src }}
+  {schema}
+>
   <article>
     <PageHead
       eyebrow={`Home Compostable · ${p.dimensions}`}
-      heading={`หลอดชานอ้อย ${p.shortName}`}
-      intro={`${p.useCase} แช่อยู่ในแก้วได้ตลอดการดื่มโดยไม่เปื่อยยุ่ย และย่อยสลายเองได้ในธรรมชาติหลังใช้งาน`}
+      heading={guide.heading}
+      intro={guide.intro}
       crumbs={[
         { label: 'หน้าแรก', href: '/' },
         { label: 'สินค้า', href: '/products/' },
         { label: `หลอดชานอ้อย ${p.shortName}` },
       ]}
     >
-      <div class="mt-9 flex flex-wrap gap-3">
+      <div class="action-group mt-6 sm:mt-8">
         <a
-          href="/sample/"
+          href="/sugarcane-straw/"
           class="bg-cream-100 px-6 py-3.5 font-semibold text-forest-900 transition hover:bg-cream-50"
-          style="border-radius: var(--radius-sharp)"
+          style="border-radius: var(--radius-pill)"
         >
           ขอตัวอย่างฟรี
         </a>
-        <a
-          href={CONTACT.lineUrl}
-          class="px-6 py-3.5 font-semibold text-cream-50 ring-1 ring-cream-200/40 transition hover:bg-forest-800"
-          style="border-radius: var(--radius-sharp)"
-        >
-          สอบถามราคาทาง LINE
-        </a>
+        <LineButton placement="product">สอบถามสินค้านี้ทาง LINE</LineButton>
       </div>
     </PageHead>
 
     <!-- รูปสินค้า + เมนูที่เหมาะ -->
-    <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 lg:grid-cols-[1fr_1fr] lg:gap-16">
-      <div class="grid grid-cols-2 gap-4">
+    <div class="mx-auto grid max-w-6xl gap-10 px-5 sm:px-6 section-space-sm lg:grid-cols-[1fr_1fr] lg:gap-16">
+      <div class="grid grid-cols-2 items-end gap-4 self-start lg:sticky lg:top-24">
         {/* รูปลบพื้นขาวออกแล้ว จึงไม่ต้องมีกล่องครีมรอง — หลอดลอยอยู่บนพื้นหน้าเว็บตรง ๆ ไม่มีกรอบสี่เหลี่ยม
             width/height ดึงจากไฟล์ข้อมูล ไม่ใช่เลขที่เดาไว้ ไม่งั้นเบราว์เซอร์จองพื้นที่ผิดแล้วหน้ากระตุก (CLS) */}
-        <div class="col-span-2 flex items-center justify-center py-4">
+        <div class="col-span-2 flex items-center justify-center">
           <img
             src={p.images[0].src}
             alt={p.images[0].alt}
@@ -108,12 +111,12 @@ const specs = [
             height={p.images[0].height}
             fetchpriority="high"
             decoding="async"
-            class="w-full max-w-sm object-contain"
+            class="h-64 w-full object-contain sm:h-80"
           />
         </div>
         {
           p.images.length > 1 && (
-            <div class="col-span-2 flex items-end justify-center sm:col-span-1">
+            <div class="flex items-end justify-center">
               {/* จัดชิดล่าง — รูปแก้วสูงไม่เท่ากันแต่ละขนาด ถ้าจัดกลางก้นแก้วจะลอยไม่ตรงกับบล็อกเขียวข้าง ๆ */}
               <img
                 src={p.images[1].src}
@@ -122,17 +125,17 @@ const specs = [
                 height={p.images[1].height}
                 loading="lazy"
                 decoding="async"
-                class="max-h-72 w-auto object-contain"
+                class="h-40 w-full object-contain object-bottom sm:h-48"
               />
             </div>
           )
         }
         <!-- บล็อกตัวเลขขนาดแทนรูปที่ 3 — ย้ำจุดที่ลูกค้าใช้เลือกสินค้า -->
         <div
-          class="col-span-2 flex flex-col justify-center bg-forest-800 p-6 text-cream-100 sm:col-span-1"
-          style="border-radius: var(--radius-sharp)"
+          class="flex min-h-40 flex-col justify-center bg-forest-800 p-4 text-cream-100 sm:min-h-48 sm:p-6"
+          style="border-radius: var(--radius-card)"
         >
-          <p class="index-num text-6xl text-cream-50">
+          <p class="index-num text-5xl text-cream-50 sm:text-6xl">
             {p.size}<span class="ml-1.5 font-sans text-lg font-medium text-cane-300">มม.</span>
           </p>
           <p class="tabular mt-2 text-sm text-cream-200/75">เส้นผ่านศูนย์กลาง × ยาว 210 มม.</p>
@@ -143,19 +146,19 @@ const specs = [
         {
           p.note && (
             <p
-              class="border-l-2 border-cane-500 bg-cream-100 px-5 py-4 text-sm text-forest-900"
-              style="border-radius: 0 var(--radius-sharp) var(--radius-sharp) 0"
+              class="border border-cane-300/40 bg-cream-100 px-5 py-4 text-sm text-forest-900"
+              style="border-radius: var(--radius-card)"
             >
               {p.note}
             </p>
           )
         }
 
-        <h2 class="mt-8 text-xl font-medium text-forest-900">เหมาะกับเมนู</h2>
-        <ul class="mt-4 divide-y divide-forest-200/70 border-y border-forest-200/70">
+        <h2 class:list={['text-xl font-medium text-forest-900', p.note && 'mt-6']}>เหมาะกับเมนู</h2>
+        <ul class="mt-4 grid grid-cols-2 gap-x-4 border-t border-forest-200/70">
           {
             p.drinks.map((d) => (
-              <li class="py-3 text-forest-900">{d}</li>
+              <li class="border-b border-forest-200/70 py-3 text-sm text-forest-900 sm:text-base">{d}</li>
             ))
           }
         </ul>
@@ -164,9 +167,9 @@ const specs = [
         <dl class="mt-4 divide-y divide-forest-200/70 border-y border-forest-200/70">
           {
             specs.map((s) => (
-              <div class="grid gap-1 py-3.5 sm:grid-cols-[10rem_1fr] sm:gap-4">
+              <div class="grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-3.5 sm:grid-cols-[10rem_minmax(0,1fr)]">
                 <dt class="text-sm text-forest-600">{s.label}</dt>
-                <dd class="font-medium text-forest-900">{s.value}</dd>
+                <dd class="text-sm font-medium text-forest-900 sm:text-base">{s.value}</dd>
               </div>
             ))
           }
@@ -176,13 +179,14 @@ const specs = [
 
     <!-- บรรจุภัณฑ์ -->
     <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="packing">
-      <div class="mx-auto max-w-6xl px-4 py-16">
+      <div class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm">
         <p class="eyebrow">ขายส่ง</p>
         <h2 id="packing" class="mt-3 text-2xl font-medium text-forest-900">
           ขนาดบรรจุขายส่ง
         </h2>
 
-        <div class="mt-7 overflow-x-auto">
+        <p class="mt-5 text-xs text-forest-600 sm:hidden">เลื่อนตารางซ้าย–ขวาเพื่อดูข้อมูลบรรจุครบ →</p>
+        <div class="mt-5 table-scroll" tabindex="0" role="region" aria-label="ตารางบรรจุขายส่ง">
           <table class="tabular w-full min-w-[480px] border-collapse text-left">
             <caption class="sr-only">ตารางขนาดบรรจุของหลอดชานอ้อย {p.shortName}</caption>
             <thead>
@@ -224,7 +228,7 @@ const specs = [
     </section>
 
     <!-- ใบรับรอง -->
-    <section class="mx-auto max-w-6xl px-4 py-16" aria-labelledby="p-certs">
+    <section class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm" aria-labelledby="p-certs">
       <p class="eyebrow">มาตรฐาน</p>
       <h2 id="p-certs" class="mt-3 text-2xl font-medium text-forest-900">
         มาตรฐานที่ผ่านการรับรอง
@@ -251,7 +255,7 @@ const specs = [
 
   <!-- ขนาดอื่น -->
   <section class="border-t border-forest-200/60 bg-cream-100" aria-labelledby="others">
-    <div class="mx-auto max-w-6xl px-4 py-16">
+    <div class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm">
       <h2 id="others" class="text-2xl font-medium text-forest-900">
         ขนาดอื่นที่มีจำหน่าย
       </h2>
@@ -261,7 +265,7 @@ const specs = [
             <a
               href={`/products/${o.slug}/`}
               class="group flex items-center gap-5 border border-forest-200/70 bg-cream-50 p-5 transition hover:border-forest-400"
-              style="border-radius: var(--radius-sharp)"
+              style="border-radius: var(--radius-card)"
             >
               <span class="index-num shrink-0 text-4xl text-cane-500" aria-hidden="true">
                 {o.size}
@@ -279,5 +283,23 @@ const specs = [
     </div>
   </section>
 
+  <section class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm" aria-labelledby="usage-guide">
+    <p class="eyebrow">คำแนะนำสำหรับหลอด {p.shortName}</p>
+    <h2 id="usage-guide" class="mt-3 text-2xl font-medium leading-snug text-forest-900 sm:text-3xl">{guide.guideHeading}</h2>
+    <p class="mt-4 max-w-3xl leading-relaxed text-forest-700">{guide.guideIntro}</p>
+    <div class="mt-7 grid gap-5 md:grid-cols-3">
+      {guide.tips.map((tip) => (
+        <div class="border border-forest-200/60 bg-cream-100 p-6" style="border-radius: var(--radius-card)">
+          <h3 class="font-medium text-forest-900">{tip.title}</h3>
+          <p class="mt-3 text-sm leading-relaxed text-forest-700">{tip.text}</p>
+        </div>
+      ))}
+    </div>
+    <p class="mt-6 text-sm leading-relaxed text-forest-700">
+      <a href="/faq/#order" class="underline underline-offset-4 hover:text-forest-900">อ่านวิธีเก็บรักษาและคำถามเรื่องการสั่งซื้อ</a>
+      <span class="mx-2" aria-hidden="true">·</span>
+      <a href="/products/" class="underline underline-offset-4 hover:text-forest-900">เปรียบเทียบหลอดทุกขนาด</a>
+    </p>
+  </section>
   <CtaBand />
 </Base>

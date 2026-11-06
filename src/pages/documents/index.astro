@@ -1,0 +1,21 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import {PRODUCTS, CONTACT} from '../../data/products';
+const title='ดาวน์โหลดสเปกหลอดชานอ้อยและเอกสารสำหรับฝ่ายจัดซื้อ';
+const description='ดาวน์โหลดเอกสารขนาดหลอดชานอ้อย 6, 8 และ 12 มม. ขนาดบรรจุและข้อมูลติดต่อสำหรับขอใบเสนอราคา พร้อมช่องทางขอใบรับรองประกอบการจัดซื้อ';
+---
+<Base {title} {description}>
+<PageHead eyebrow="เอกสารสำหรับองค์กร" heading="ข้อมูลพร้อมส่งต่อให้ฝ่ายจัดซื้อ" intro="เลือกดาวน์โหลดสเปกตามขนาดที่สนใจ หรือใช้เอกสารรวมเพื่อเปรียบเทียบขนาดและบรรจุขายส่ง" crumbs={[{label:'หน้าแรก',href:'/'},{label:'เอกสารดาวน์โหลด'}]} />
+<section class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm">
+ <a href="/downloads/verdeloop-catalog.pdf" download class="block rounded-3xl bg-forest-800 p-7 text-cream-50"><span class="text-sm">PDF · ข้อมูลสินค้าทั้ง 3 ขนาด</span><h2 class="mt-2 text-2xl">ดาวน์โหลดสเปกสินค้ารวม</h2><p class="mt-3">ขนาด การใช้งาน และบรรจุขายส่งในไฟล์เดียว ↓</p></a>
+ <div class="mt-6 grid gap-5 md:grid-cols-3">{PRODUCTS.map(p=><article class="rounded-3xl border border-forest-200 bg-cream-100 p-6"><h2 class="text-xl">หลอดชานอ้อย {p.shortName}</h2><p class="mt-3 text-forest-700">{p.useCase}</p><a class="mt-6 inline-block font-semibold underline underline-offset-4" href={`/downloads/verdeloop-${p.slug}.pdf`} download>ดาวน์โหลดสเปก PDF ↓</a></article>)}</div>
+ <section id="uploaded-documents" class="mt-10" hidden><h2 class="text-2xl">เอกสารฉบับเต็ม</h2><ul id="document-list" class="mt-5 grid gap-4 md:grid-cols-2"></ul></section>
+ <section class="mt-12 border-t border-forest-200 pt-8"><h2 class="text-2xl">ใบรับรองและผลทดสอบ</h2><p class="mt-4 max-w-3xl leading-relaxed text-forest-700">ขอใบรับรองฉบับจริงและผลทดสอบได้ทาง LINE กรุณาแจ้งขนาดสินค้าและเอกสารที่ฝ่ายจัดซื้อต้องการ ทีมงานจะตรวจสอบเอกสารที่ตรงกับรุ่นและส่งให้ทาง LINE</p></section>
+</section>
+<CtaBand />
+<script>
+fetch('/api/documents').then(r=>r.ok?r.json():null).then(data=>{if(!data?.documents?.length)return;const list=document.getElementById('document-list');for(const item of data.documents){const li=document.createElement('li'),a=document.createElement('a');a.href='/api/documents?id='+encodeURIComponent(item.id);a.download='';a.textContent=item.title+' · PDF ↓';a.className='block rounded-2xl border border-forest-200 p-5 font-semibold underline underline-offset-4';li.append(a);list?.append(li);}document.getElementById('uploaded-documents')?.removeAttribute('hidden');}).catch(()=>{});
+</script>
+</Base>

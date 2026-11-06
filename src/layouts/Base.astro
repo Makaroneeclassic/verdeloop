@@ -2,20 +2,25 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE } from '../data/products';
+import ContactActions from '../components/ContactActions.astro';
+import Measurement from '../components/Measurement.astro';
+import { CONTACT, SITE } from '../data/products';
 
 interface Props {
   title: string;
   description: string;
   /// ภาพสำหรับแชร์ลง LINE/Facebook — ถ้าไม่ส่งใช้ภาพกลางของแบรนด์
   image?: string;
+  /// ภาพ LCP ของหน้า — preload ตั้งแต่ HTML ถึงมือเบราว์เซอร์ ไม่ต้องรอ parser เจอ <img>
+  /// srcset/sizes ต้องเหมือน <img> ตัวจริงเป๊ะ ไม่งั้นเบราว์เซอร์โหลดซ้ำสองไฟล์
+  preload?: { src: string; srcset?: string; sizes?: string };
   /// JSON-LD เพิ่มเติมของแต่ละหน้า (Product, FAQPage, BreadcrumbList)
   schema?: Record<string, unknown> | Record<string, unknown>[];
   /// หน้าที่ไม่อยากให้ Google เก็บ index เช่นหน้าขอบคุณหลังส่งฟอร์ม
   noindex?: boolean;
 }
 
-const { title, description, image, schema, noindex = false } = Astro.props;
+const { title, description, image, preload, schema, noindex = false } = Astro.props;
 
 // canonical ต้องเป็น URL เต็มและไม่มี query string — กัน Google มองว่าเป็นหน้าซ้ำ
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -28,14 +33,27 @@ const ogImage = new URL(image ?? '/img/og/og-default.jpg', Astro.site).href;
 const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
 
 // Organization schema ใส่ทุกหน้า — บอก Google ว่าใครเป็นเจ้าของเว็บ
+// logo + contactPoint + sameAs ช่วยให้ Google ประกอบ knowledge panel และรู้จักช่องทางติดต่อ
 const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: SITE.name,
   url: SITE.url,
-  logo: new URL('/logo.svg', Astro.site).href,
-  description: 'ผู้ผลิตและจำหน่ายหลอดดูดเครื่องดื่มจากชานอ้อย ย่อยสลายได้เองตามธรรมชาติ',
+  logo: `${SITE.url}/img/verdeloop-logo.png`,
+  description: 'ผู้จำหน่ายส่งหลอดชานอ้อย ย่อยสลายได้เองตามธรรมชาติ',
   areaServed: 'TH',
+  ...(CONTACT.phone
+    ? {
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: `+66${CONTACT.phone.replace(/\D/g, '').replace(/^0/, '')}`,
+          contactType: 'sales',
+          areaServed: 'TH',
+          availableLanguage: 'th',
+        },
+      }
+    : {}),
+  sameAs: [CONTACT.lineUrl],
 };
 
 const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
@@ -58,10 +76,16 @@ const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [sche
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${SITE.name} — ${SITE.tagline}`} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <meta name="theme-color" content="#172e25" /><!-- ตรงกับ forest-900 ที่ใช้เป็นพื้น header/hero -->
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico?v=20260926" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon-48.png?v=20260926" type="image/png" sizes="48x48" />
+    <link rel="icon" href="/favicon-192.png?v=20260926" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260926" sizes="180x180" />
 
     <!-- ฟอนต์เรียกตรงจาก <link> ไม่ผ่าน @import ใน CSS
          เบราว์เซอร์จะเริ่มโหลดฟอนต์พร้อมกับ CSS แทนที่จะรอ CSS เสร็จก่อน (ดีต่อ LCP)
@@ -77,6 +101,29 @@ const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [sche
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
     />
 
+    {/* ภาพ LCP เริ่มโหลดทันทีที่ <head> ถูก parse — เร็วกว่ารอ parser ลงมาเจอ <img> ใน body */}
+    {preload && (
+      <link
+        rel="preload"
+        as="image"
+        href={preload.src}
+        srcset={preload.srcset}
+        sizes={preload.sizes}
+        fetchpriority="high"
+      />
+    )}
+
+    {/* Speculation Rules — Chrome เตรียมหน้าที่ผู้ใช้ชี้เมาส์ไว้ล่วงหน้า คลิกแล้วเปิดเสมือนทันที
+        ลิงก์ข้ามโดเมนและ target="_blank" ถูกยกเว้นอัตโนมัติ เบราว์เซอร์อื่นข้ามไปโดยไม่ error
+        ไม่ใส่ในหน้า noindex เพื่อไม่ให้เตรียมหน้าที่ไม่ต้องการให้เก็บสถิติ */}
+    {!noindex && (
+      <script
+        is:inline
+        type="speculationrules"
+        set:html={JSON.stringify({ prerender: [{ source: 'document', eagerness: 'moderate' }] })}
+      />
+    )}
+
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
   </head>
   <body class="flex min-h-dvh flex-col font-sans">
@@ -91,5 +138,7 @@ const schemas = [orgSchema, ...(schema ? (Array.isArray(schema) ? schema : [sche
       <slot />
     </main>
     <Footer />
+    <ContactActions />
+    <Measurement />
   </body>
 </html>

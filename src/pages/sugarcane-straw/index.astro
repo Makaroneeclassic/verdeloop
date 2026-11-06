@@ -1,0 +1,98 @@
+---
+import LineButton from '../../components/LineButton.astro';
+import Base from '../../layouts/Base.astro';
+import LeadRequest from '../../components/LeadRequest.astro';
+import { CONTACT, PRODUCTS, SITE } from '../../data/products';
+
+const title = 'หลอดชานอ้อยขายส่ง สำหรับคาเฟ่และร้านเครื่องดื่ม | ขอตัวอย่างฟรี';
+const description =
+  'หลอดชานอ้อยขายส่ง Verdeloop ทางเลือกหลอดรักษ์โลก ขนาด 6, 8 และ 12 มม. ห่อซองรายชิ้น สำหรับคาเฟ่ ร้านชานมและองค์กร ขอราคาตามจำนวน พร้อมตัวอย่างฟรีรวมค่าส่ง จัดส่ง 3–7 วัน';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'หน้าแรก', item: `${SITE.url}/` },
+    { '@type': 'ListItem', position: 2, name: 'หลอดชานอ้อยขายส่ง', item: `${SITE.url}/sugarcane-straw/` },
+  ],
+};
+
+---
+
+<Base {title} {description} {schema}>
+  <section class="bg-forest-900 text-cream-50">
+    <div class="mx-auto grid max-w-6xl items-center gap-6 px-5 py-8 sm:px-6 sm:py-16 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
+      <div>
+        <p class="eyebrow text-cane-300">สำหรับคาเฟ่ · ร้านชานม · โรงแรม · องค์กร</p>
+        <h1 class="mt-4 text-3xl font-medium leading-tight sm:text-5xl">หลอดชานอ้อยขายส่ง<br /><span class="text-cream-200">เลือกให้ตรงเมนูของร้าน</span></h1>
+        <p class="mt-4 max-w-xl text-base sm:text-lg leading-relaxed text-cream-200">กำลังมองหาหลอดรักษ์โลกสำหรับร้าน? เลือกหลอดจากวัสดุชานอ้อย ห่อซองกระดาษรายชิ้น มี 3 ขนาดให้เลือก ขอตัวอย่างไปลองกับเครื่องดื่มจริง พร้อมรับใบเสนอราคาตามปริมาณที่ต้องการ</p>
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a href="#request" class="landing-primary">ขอตัวอย่างฟรี / ขอราคาส่ง</a>
+          <LineButton placement="hero">สอบถามราคาทาง LINE</LineButton>
+          
+        </div>
+        <p class="mt-4 text-sm text-cream-200">6 · 8 · 12 มม. / ยาว 210 มม. / ตัวอย่างฟรี รวมค่าส่ง</p>
+      </div>
+      <div class="rounded-[2rem] bg-cream-100 p-4 text-forest-900 sm:p-8">
+        <p class="text-sm font-medium text-forest-700">จากแก้วกาแฟ ถึงชานมไข่มุก</p>
+        <div class="grid grid-cols-3 items-end gap-3 pt-5">{PRODUCTS.map(p => <div class="text-center"><img src={p.images[1].src} alt={p.images[1].alt} width={p.images[1].width} height={p.images[1].height} loading="eager" class="mx-auto h-28 w-full object-contain sm:h-60" /><p class="mt-2 text-lg font-medium">{p.shortName}</p></div>)}</div>
+        <p class="mt-4 border-t border-forest-200 pt-3 text-sm text-forest-700">เลือกขนาดจากเมนู แก้ว และท็อปปิ้งที่ร้านใช้จริง</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-5 pt-8 sm:px-6 sm:pt-16" aria-labelledby="sizes-heading">
+    <p class="eyebrow">เลือกขนาดที่ใช่</p>
+    <h2 id="sizes-heading" class="mt-3 text-3xl font-medium">เลือกขนาดหลอดรักษ์โลกให้เหมาะกับเมนูของร้าน</h2>
+    <div class="mt-5 grid gap-3 md:grid-cols-3">{PRODUCTS.map(p => <article class="landing-size rounded-3xl border border-forest-200 bg-cream-100 p-6">
+      <div class="flex items-center justify-between gap-4"><h3 class="text-3xl font-medium">{p.shortName}</h3><img src={p.images[0].src} alt={p.images[0].alt} width={p.images[0].width} height={p.images[0].height} loading="lazy" class="h-20 w-20 object-contain" /></div>
+      <p class="mt-4 font-medium">{p.useCase}</p>
+      <p class="mt-3 text-sm text-forest-700">บรรจุ {p.packing.map(o => o.pieces.toLocaleString('th-TH')).join(' / ')} ชิ้นต่อกล่อง</p>
+      <button type="button" data-select-size={p.shortName} class="mt-5 font-semibold underline underline-offset-4">ขอราคาขนาด {p.shortName} →</button>
+    </article>)}</div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-5 pt-10 sm:px-6 sm:pt-14" aria-labelledby="paper-alternative">
+    <p class="eyebrow">เปรียบเทียบก่อนเลือกซื้อ</p>
+    <h2 id="paper-alternative" class="mt-3 text-2xl font-medium sm:text-3xl">มองหาหลอดกระดาษรักษ์โลก? ลองรู้จักหลอดชานอ้อย</h2>
+    <p class="mt-4 max-w-3xl leading-relaxed text-forest-700">
+      สำหรับร้านที่กำลังเลือกหลอดกระดาษ หรืออยากเปลี่ยนวัสดุหลอดรักษ์โลก
+      Verdeloop จำหน่ายหลอดชานอ้อยสำหรับเครื่องดื่ม ขนาด 6, 8 และ 12 มม.
+      คุณสามารถขอตัวอย่างไปเปรียบเทียบความคงรูปและการใช้งานกับเมนูจริงของร้านก่อนสั่งซื้อ
+      พร้อมตรวจใบรับรองและเงื่อนไขการย่อยสลายของสินค้าแต่ละชนิด
+    </p>
+    <a href="/compare/" class="mt-4 inline-block font-semibold text-forest-800 underline underline-offset-4">เปรียบเทียบหลอดชานอ้อยกับหลอดกระดาษและ PLA →</a>
+  </section>
+
+  <LeadRequest />
+  <section class="mx-auto max-w-6xl px-5 pb-14 sm:px-6" aria-labelledby="purchase-faq">
+    <h2 id="purchase-faq" class="text-2xl font-medium">ก่อนสั่งหลอดชานอ้อยขายส่ง</h2>
+    <div class="mt-5 space-y-3">{[
+      ['จัดส่งใช้เวลากี่วัน?', 'จัดส่ง 3–7 วัน ทีมงานจะยืนยันรายละเอียดการจัดส่งกับคุณ'],
+      ['ตัวอย่างฟรีรวมค่าส่งไหม?', 'รวมค่าส่งแล้ว กรอกฟอร์มหรือทัก LINE เพื่อแจ้งขนาดที่สนใจ ทีมงานจะติดต่อกลับเพื่อยืนยันที่อยู่จัดส่ง'],
+      ['ยังไม่แน่ใจว่าควรเลือกขนาดไหน?', 'แจ้งเมนูเครื่องดื่มและท็อปปิ้งของร้าน ทีมงานช่วยแนะนำขนาด และสามารถขอตัวอย่างไปทดลองก่อนตัดสินใจ'],
+      ['ใช้กับเครื่องดื่มร้อนได้ไหม?', 'กรุณายืนยันช่วงอุณหภูมิของรุ่นสินค้ากับทีมงานก่อนใช้งาน และทดลองกับเมนูจริงของร้าน'],
+      ['ขอใบรับรองสำหรับฝ่ายจัดซื้อได้ที่ไหน?', 'ทัก LINE พร้อมแจ้งขนาดสินค้าและเอกสารที่ต้องการ ทีมงานจะส่งเอกสารที่ตรงกับรุ่นให้โดยตรง'],
+    ].map(([q,a]) => <details class="rounded-2xl border border-forest-200 px-5 py-4"><summary class="cursor-pointer font-medium">{q}</summary><p class="mt-3 leading-relaxed text-forest-700">{a}</p></details>)}</div>
+  </section>
+</Base>
+<style>
+.landing-primary{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:14px 22px;font-weight:600;text-align:center;background:#f5f2e8;color:#183b2d}
+.landing-primary:hover{background:#fffdf7}
+@media(max-width:767px){
+ .landing-size{display:grid;grid-template-columns:1fr 64px;gap:5px 12px;padding:16px 18px}
+ .landing-size>div{display:contents}.landing-size h3{grid-column:1;font-size:24px}
+ .landing-size img{grid-column:2;grid-row:1/5;width:64px;height:80px;align-self:center}
+ .landing-size>p,.landing-size>button{grid-column:1;margin-top:0;font-size:14px}
+ .landing-size>button{text-align:left;padding:7px 0}
+}
+</style>
+<script>
+ document.querySelectorAll<HTMLButtonElement>('[data-select-size]').forEach(button=>button.addEventListener('click',()=>{
+  const select=document.getElementById('size') as HTMLSelectElement;
+  select.value=button.dataset.selectSize || '';
+  document.getElementById('request')?.scrollIntoView({behavior:'smooth'});
+  select.focus({preventScroll:true});
+ }));
+</script>
+

@@ -2,6 +2,7 @@ node_modules/
 dist/
 .astro/
 .vercel/
+lib/generated/
 
 # ห้าม commit เด็ดขาด — มี LINE Channel Access Token, รหัสฐานข้อมูล Neon และรหัสเข้าหลังบ้าน
 .env

@@ -10,46 +10,34 @@ const links = [
   { href: '/esg/', label: 'ESG & คาร์บอน' },
   { href: '/certifications/', label: 'ใบรับรอง' },
   { href: '/faq/', label: 'คำถามที่พบบ่อย' },
+  { href: '/articles/', label: 'บทความ' },
 ];
 ---
 
 <!-- แถบบนสุด: เบอร์โทรอยู่บนสุดเสมอ เพราะลูกค้า B2B โทรมากกว่าจะกดฟอร์ม -->
 <div class="hidden bg-forest-900 text-cream-200/85 lg:block">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-1.5 text-xs">
-    <p>ผู้ผลิตและจำหน่ายส่งหลอดชานอ้อย · ส่งทั่วประเทศ</p>
-    <p class="flex items-center gap-5">
-      {
-        CONTACT.phone && (
-          <a href={CONTACT.phoneHref} data-track="phone" class="hover:text-cream-50">
-            โทร {CONTACT.phone}
-          </a>
-        )
-      }
-      <a href={CONTACT.lineUrl} data-track="line" class="hover:text-cream-50">
-        LINE {CONTACT.lineId}
-      </a>
-    </p>
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-1.5 text-xs">
+    <p>ผู้จำหน่ายส่งหลอดชานอ้อย · ส่งทั่วประเทศ</p>
+
   </div>
 </div>
 
 <header class="sticky top-0 z-40 border-b border-forest-200/60 bg-cream-50/95 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-    <a href="/" class="flex shrink-0 items-baseline gap-1.5" aria-label="Verdeloop หน้าแรก">
-      <span class="text-xl font-medium tracking-tight text-forest-900">Verdeloop</span>
-      <span class="hidden text-[0.6rem] font-semibold tracking-[0.2em] text-cane-600 uppercase sm:inline">
-        Thailand
-      </span>
+  <div class="mx-auto flex max-w-6xl items-center gap-2 px-5 py-3 sm:gap-4 sm:px-6">
+    <a href="/" class="flex min-w-0 w-32 shrink items-center sm:w-48 lg:w-44 xl:w-52" aria-label="Verdeloop หน้าแรก">
+      {/* โลโก้พาเลตต์ 16 สี 5.9KB — ไม่ใส่ fetchpriority ให้รูป hero เป็น LCP เดียวของหน้า */}
+      <img src="/img/verdeloop-logo.png" width="640" height="139" alt="Verdeloop" class="block h-auto w-full" decoding="async" />
     </a>
 
     <!-- เมนู: ใช้ขีดใต้ตัวอักษรบอกหน้าปัจจุบัน ไม่ใช้ปุ่มกลมพื้นสี -->
-    <nav aria-label="เมนูหลัก" class="mx-auto hidden items-center gap-7 lg:flex">
+    <nav aria-label="เมนูหลัก" class="mx-auto hidden items-center gap-4 lg:flex xl:gap-7">
       {
         links.map((l) => (
           <a
             href={l.href}
             aria-current={isActive(l.href) ? 'page' : undefined}
             class:list={[
-              'border-b-2 py-1 text-sm transition',
+              'whitespace-nowrap border-b-2 py-1 text-sm transition',
               isActive(l.href)
                 ? 'border-cane-500 font-semibold text-forest-900'
                 : 'border-transparent text-forest-700 hover:border-forest-300 hover:text-forest-900',
@@ -62,18 +50,18 @@ const links = [
     </nav>
 
     <a
-      href="/sample/"
-      class="ml-auto shrink-0 bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 transition hover:bg-forest-950 lg:ml-0"
-      style="border-radius: var(--radius-sharp)"
+      href={(path === '/' || path.replace(/\/$/, '') === '/sugarcane-straw') ? '#request' : '/sugarcane-straw/#request'}
+      class="ml-auto inline-flex min-h-11 shrink-0 items-center bg-forest-800 px-3 py-2 text-xs font-semibold text-cream-50 transition hover:bg-forest-950 sm:px-4 sm:text-sm lg:ml-0"
+      style="border-radius: var(--radius-pill)"
     >
       ขอตัวอย่างฟรี
     </a>
 
-    <!-- มือถือ: ใช้ details/summary เป็นเมนู ไม่ต้องใช้ JS เลย โหลดเร็วกว่า -->
-    <details class="relative lg:hidden">
+    <!-- details/summary ใช้งานได้แม้ปิด JS; สคริปต์เสริมการปิดด้วย Escape และคลิกด้านนอก -->
+    <details data-mobile-menu class="relative shrink-0 lg:hidden">
       <summary
-        class="flex h-9 w-9 cursor-pointer list-none items-center justify-center text-forest-800 ring-1 ring-forest-300"
-        style="border-radius: var(--radius-sharp)"
+        class="flex h-11 w-11 cursor-pointer list-none items-center justify-center text-forest-800 ring-1 ring-forest-300"
+        style="border-radius: var(--radius-control)"
         aria-label="เปิดเมนู"
       >
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -82,12 +70,12 @@ const links = [
       </summary>
       <nav
         aria-label="เมนูมือถือ"
-        class="absolute right-0 mt-3 w-60 border border-forest-200 bg-cream-50 py-2 shadow-xl"
-        style="border-radius: var(--radius-sharp)"
+        class="absolute right-0 mt-3 max-h-[calc(100dvh-6rem)] w-72 max-w-[calc(100vw-2.5rem)] overflow-y-auto overscroll-contain border border-forest-200 bg-cream-50 py-2 shadow-xl"
+        style="border-radius: var(--radius-card)"
       >
         {
           [{ href: '/', label: 'หน้าแรก' }, ...links].map((l) => (
-            <a href={l.href} class="block px-4 py-2.5 text-sm text-forest-800 hover:bg-forest-50">
+            <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined} class="block px-4 py-2.5 text-sm text-forest-800 hover:bg-forest-50 aria-[current=page]:bg-forest-50 aria-[current=page]:font-semibold">
               {l.label}
             </a>
           ))
@@ -99,22 +87,34 @@ const links = [
           PRODUCTS.map((p) => (
             <a
               href={`/products/${p.slug}/`}
-              class="tabular flex items-center justify-between px-4 py-2 text-sm text-forest-700 hover:bg-forest-50"
+              class="tabular flex min-h-11 items-center justify-between px-4 py-2 text-sm text-forest-700 hover:bg-forest-50"
             >
               <span>หลอด {p.shortName}</span>
               <span class="text-xs text-forest-500">{p.useCase.split(' ')[0]}</span>
             </a>
           ))
         }
-        {/* เมนูมือถือ: ถ้ายังไม่มีเบอร์ ให้ LINE ทำหน้าที่ช่องทางด่วนแทน ไม่ปล่อยว่าง */}
-        <a
-          href={CONTACT.phone ? CONTACT.phoneHref : CONTACT.lineUrl}
-          data-track={CONTACT.phone ? 'phone' : 'line'}
-          class="mt-2 block border-t border-forest-100 px-4 pt-3 text-sm font-semibold text-forest-900 hover:bg-forest-50"
-        >
-          {CONTACT.phone ? `โทร ${CONTACT.phone}` : `ทัก LINE ${CONTACT.lineId}`}
-        </a>
+
+        
       </nav>
     </details>
   </div>
 </header>
+
+<script>
+  const menu = document.querySelector<HTMLDetailsElement>('[data-mobile-menu]');
+  if (menu) {
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menu.open) {
+        menu.open = false;
+        menu.querySelector('summary')?.focus();
+      }
+    });
+    matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
+      if (event.matches) menu.open = false;
+    });
+  }
+</script>

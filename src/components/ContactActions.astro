@@ -1,0 +1,29 @@
+---
+import LineButton from './LineButton.astro';
+const path=Astro.url.pathname;
+const selling=path==='/'||path.startsWith('/products/')||path==='/sugarcane-straw/';
+const formLink=path==='/'||path==='/sugarcane-straw/'?'#request':'/sugarcane-straw/#request';
+---
+{selling && <nav id="contact-actions" aria-label="สอบถามสินค้า" class="contact-actions">
+  <a class="contact-sample" href={formLink}>ขอตัวอย่างฟรี</a>
+  <LineButton placement="contact_bar">ทัก LINE</LineButton>
+</nav>}
+<style is:global>
+.contact-actions{position:fixed;right:24px;bottom:24px;z-index:45;filter:drop-shadow(0 4px 14px #173c3020)}
+#contact-actions .line-button{min-height:56px;padding:8px 20px;background:#fff;border-color:#06c755}
+#contact-actions .line-button:hover{background:#ecfff3}
+.contact-actions .contact-sample{display:none}
+body:has(#measurement-banner:not([hidden])) .contact-actions,body:has(#measurement-dialog[open]) .contact-actions{display:none}
+@media(max-width:767px){
+ body:has(#contact-actions){padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+ .contact-actions{left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fbfaf5;border-top:1px solid #cbd8cc;filter:none}
+ .contact-actions .contact-sample{display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid #a8c0ab;color:#183b2d;font-size:14px;font-weight:600}
+ #contact-actions .line-button{font-size:14px;padding:8px 12px}
+ .contact-actions[data-form-visible="true"],body:has(#form :focus) .contact-actions{display:none}
+}
+</style>
+<script>
+const bar=document.getElementById('contact-actions');
+const form=document.getElementById('form');
+if(bar&&form&&'IntersectionObserver' in window)new IntersectionObserver(([entry])=>{bar.dataset.formVisible=String(entry.isIntersecting)},{threshold:0}).observe(form);
+</script>

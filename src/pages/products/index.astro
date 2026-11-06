@@ -3,11 +3,12 @@ import Base from '../../layouts/Base.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import PageHead from '../../components/PageHead.astro';
+import StrawCare from '../../components/StrawCare.astro';
 import { PRODUCTS, SITE } from '../../data/products';
 
 const title = 'หลอดชานอ้อยทุกขนาด 6, 8, 12 มม. ราคาส่ง';
 const description =
-  'หลอดชานอ้อย Verdeloop มี 3 ขนาด 6 มม. สำหรับเครื่องดื่มทั่วไป 8 มม. สำหรับเมนูปั่น และ 12 มม. สำหรับชานมไข่มุก ทุกขนาดยาว 210 มม. ห่อซองกระดาษ ย่อยสลายได้เอง 100%';
+  'เลือกหลอดรักษ์โลกจากชานอ้อย Verdeloop มี 3 ขนาด 6 มม. สำหรับเครื่องดื่มทั่วไป 8 มม. สำหรับเมนูปั่น และ 12 มม. สำหรับชานมไข่มุก ทุกขนาดยาว 210 มม. ห่อซองกระดาษ ย่อยสลายได้เอง 100%';
 
 const schema = {
   '@context': 'https://schema.org',
@@ -23,18 +24,18 @@ const schema = {
   <PageHead
     eyebrow="สินค้า"
     heading="หลอดชานอ้อยทุกขนาด"
-    intro="ทุกขนาดยาว 210 มม. ห่อซองกระดาษรายชิ้น ผ่านมาตรฐาน TUV Home Compost เลือกเส้นผ่านศูนย์กลางให้เหมาะกับความข้นของเครื่องดื่มและท็อปปิ้งที่ใส่"
+    intro="สำหรับร้านที่กำลังเลือกหลอดรักษ์โลก หลอดชานอ้อยของเราทุกขนาดยาว 210 มม. ห่อซองกระดาษรายชิ้น ผ่านมาตรฐาน TUV Home Compost เลือกเส้นผ่านศูนย์กลางให้เหมาะกับความข้นของเครื่องดื่มและท็อปปิ้งที่ใส่"
     crumbs={[{ label: 'หน้าแรก', href: '/' }, { label: 'สินค้า' }]}
   />
 
-  <section class="mx-auto max-w-6xl px-4 py-16">
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <section class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm">
+    <div class="grid gap-6 md:grid-cols-3">
       {PRODUCTS.map((p) => <ProductCard product={p} />)}
     </div>
   </section>
 
   <section class="border-t border-forest-200/60 bg-cream-100" aria-labelledby="pick">
-    <div class="mx-auto max-w-6xl px-4 py-16">
+    <div class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm">
       <p class="eyebrow">คู่มือเลือกซื้อ</p>
       <h2 id="pick" class="mt-3 text-2xl font-medium text-forest-900">
         เลือกขนาดยังไงให้ถูก
@@ -43,7 +44,8 @@ const schema = {
         หลักง่าย ๆ คือดูจากสิ่งที่ต้องดูดผ่านหลอด ยิ่งมีท็อปปิ้งชิ้นใหญ่ ยิ่งต้องใช้ปากกว้าง
       </p>
 
-      <div class="mt-8 overflow-x-auto">
+      <p class="mt-5 text-xs text-forest-600 sm:hidden">เลื่อนตารางซ้าย–ขวาเพื่อดูข้อมูลครบ →</p>
+      <div class="mt-5 table-scroll" tabindex="0" role="region" aria-label="ตารางเลือกขนาดหลอด">
         <table class="tabular w-full min-w-[560px] border-collapse text-left">
           <caption class="sr-only">ตารางเปรียบเทียบขนาดหลอดชานอ้อยและการใช้งาน</caption>
           <thead>
@@ -81,5 +83,6 @@ const schema = {
     </div>
   </section>
 
+  <StrawCare />
   <CtaBand />
 </Base>

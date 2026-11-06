@@ -38,9 +38,11 @@
      และเผื่ออนาคตอยากเปลี่ยนฟอนต์หัวข้อ แก้ที่บรรทัดนี้บรรทัดเดียวจบ */
   --font-display: var(--font-sans);
 
-  /* มุมโค้งใช้แค่ค่าเดียวทั้งเว็บ (4px) — งานออกแบบจริงไม่ผสมมุมมนหลายขนาด
-     ยกเว้นปุ่มที่ใช้ full round เพื่อให้กดง่ายบนมือถือ */
-  --radius-sharp: 4px;
+  /* โค้งมนตามหน้าที่: กล่องใหญ่ ช่องกรอก และปุ่มแคปซูล */
+  --radius-card: 1.5rem;
+  --radius-control: 0.875rem;
+  --radius-pill: 9999px;
+  --shadow-soft: 0 8px 28px rgb(38 75 57 / 5%);
 }
 
 /* ค่าเริ่มต้นของ element ต้องอยู่ใน @layer base เสมอ
@@ -70,12 +72,47 @@
   h1, h2, h3, h4, h5, h6 {
     line-height: 1.35;
     letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--color-cane-600);
+    outline-offset: 4px;
   }
 }
 
 /* คลาสของเราเองอยู่ชั้น components — ต่ำกว่า utilities ของ Tailwind
    เผื่อวันหลังอยากใช้ utility ทับเป็นรายจุด จะทับได้จริง */
 @layer components {
+  /* ใช้จังหวะระยะห่างเดียวกันทั้งเว็บ โดยลดช่องว่างบนจอเล็ก */
+  .section-space { padding-block: clamp(2.5rem, 5vw, 5rem); }
+  .section-space-sm { padding-block: clamp(2.5rem, 4vw, 4rem); }
+
+  /* กำหนด containing block ให้ข้อความ sr-only อยู่ภายในตารางที่เลื่อนได้ */
+  .table-scroll {
+    position: relative;
+    min-width: 0;
+    overflow-x: auto;
+    border-radius: var(--radius-control);
+  }
+
+  .action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .action-group > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    text-align: center;
+  }
+  @media (width < 40rem) {
+    .action-group > a { flex: 1 1 100%; }
+  }
   /* ป้ายกำกับหมวด — ตัวเล็ก เว้นตัวอักษรกว้าง ใช้แทนป้ายกลมสำเร็จรูป */
   .eyebrow {
     font-size: 0.75rem;
@@ -89,26 +126,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* อุปกรณ์ประจำแบรนด์: ลายขีดสเกลวัดขนาด
-   สินค้านี้ตัดสินใจซื้อกันที่ตัวเลข 6/8/12 มม. เลยเอาสเกลไม้บรรทัดมาเป็นลายเส้นคั่น
-   แทนที่จะใช้เส้นเทา ๆ ธรรมดาหรือ gradient จาง ๆ ที่ไม่ได้สื่ออะไร */
+/* จุดกลมเล็กแทนขีดสเกล ให้เส้นคั่นดูเบาและเข้ากับมุมโค้ง */
 .tick-rule {
-  height: 10px;
-  background-image: repeating-linear-gradient(
-    to right,
-    currentColor 0,
-    currentColor 1px,
-    transparent 1px,
-    transparent 9px
-  );
-  opacity: 0.28;
+  height: 6px;
+  background-image: radial-gradient(circle, currentColor 1.5px, transparent 1.7px);
+  background-size: 14px 6px;
+  opacity: 0.3;
 }
 
-/* CtaBand เป็นแถบเข้มเต็มความกว้างที่ต่อกับ footer พอดี ไม่ต้องมีช่องว่างคั่น
-   แต่หน้าที่ไม่มี CtaBand ต้องเว้นระยะก่อนถึง footer เอง */
-main:not(:has([data-cta])) + footer {
-  margin-top: 5rem;
-}
+/* section สุดท้ายของแต่ละหน้ามี padding อยู่แล้ว ไม่เพิ่มช่องว่างซ้ำก่อน footer */
 
 /* หมายเลขลำดับตัวโต ใช้นำสายตาในลิสต์เชิงบทความ */
 .index-num {
@@ -124,4 +150,15 @@ main:not(:has([data-cta])) + footer {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Shared LINE contact treatment, including server-rendered article buttons. */
+.line-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;max-width:100%;padding:8px 18px;border:1px solid #06c755;border-radius:999px;background:#f5fff8;color:#173c30;font-size:14px;font-weight:600;line-height:1.5;text-align:center;text-decoration:none;vertical-align:middle;transition:background .15s}
+.line-button:hover{background:#e1f9ea;color:#173c30}
+.line-button:focus-visible{outline:2px solid #173c30;outline-offset:3px}
+.line-button .line-button-icon{display:block;flex:0 0 32px;width:32px;height:32px;max-width:none;object-fit:contain;margin:0}
+.line-button>span{min-width:0}
+@media(max-width:767px){
+ .line-button{min-height:56px;padding:8px 16px}
+ .line-button .line-button-icon{flex-basis:40px;width:40px;height:40px}
 }

@@ -42,7 +42,7 @@ const co2Map = JSON.stringify(
 
   <article>
     <!-- ตัวเลขดิบ วางไว้บนสุดเพราะคนที่มาหน้านี้มาหาเลขนี้โดยตรง -->
-    <section class="mx-auto max-w-6xl px-4 py-14" aria-labelledby="numbers">
+    <section class="mx-auto max-w-6xl px-5 sm:px-6 section-space-sm" aria-labelledby="numbers">
       <p class="eyebrow">ตัวเลขที่ตรวจวัดแล้ว</p>
       <h2 id="numbers" class="mt-3 text-2xl font-medium text-forest-900">
         คาร์บอนฟุตพริ้นต์ต่อหลอด
@@ -53,7 +53,7 @@ const co2Map = JSON.stringify(
           PRODUCTS.map((p) => (
             <div
               class="border border-forest-200/70 bg-cream-100 p-6"
-              style="border-radius: var(--radius-sharp)"
+              style="border-radius: var(--radius-card)"
             >
               <dt class="text-sm text-forest-700">หลอดชานอ้อย {p.shortName}</dt>
               <dd class="index-num tabular mt-2 text-4xl text-forest-900">
@@ -75,10 +75,10 @@ const co2Map = JSON.stringify(
 
     <!-- เครื่องคิดเลข -->
     <section class="border-y border-forest-200/60 bg-cream-100" aria-labelledby="calc">
-      <div class="mx-auto max-w-4xl px-4 py-16">
+      <div class="mx-auto max-w-4xl px-5 sm:px-6 section-space-sm">
         <p class="eyebrow">เครื่องคำนวณ</p>
         <h2 id="calc" class="mt-3 text-2xl font-medium text-forest-900">
-          ร้านคุณลด CO₂ ได้เท่าไหร่ต่อปี
+          คำนวณคาร์บอนจากหลอดที่ใช้ต่อปี
         </h2>
         <p class="mt-3 max-w-2xl text-forest-800/85">
           กรอกจำนวนแก้วที่ขายต่อวันและขนาดหลอดที่ใช้
@@ -87,7 +87,7 @@ const co2Map = JSON.stringify(
 
         <div
           class="mt-8 border border-forest-200 bg-cream-50 p-6 sm:p-8"
-          style="border-radius: var(--radius-sharp)"
+          style="border-radius: var(--radius-card)"
           data-calc
           data-co2={co2Map}
         >
@@ -105,7 +105,7 @@ const co2Map = JSON.stringify(
                 value="300"
                 inputmode="numeric"
                 class="tabular mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
-                style="border-radius: var(--radius-sharp)"
+                style="border-radius: var(--radius-control)"
               />
             </div>
             <div>
@@ -113,12 +113,12 @@ const co2Map = JSON.stringify(
               <select
                 id="size"
                 class="mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
-                style="border-radius: var(--radius-sharp)"
+                style="border-radius: var(--radius-control)"
               >
                 {
                   PRODUCTS.map((p) => (
                     <option value={p.size}>
-                      {p.shortName} — {p.useCase}
+                      {p.shortName} — {p.useCase.split(' ')[0]}
                     </option>
                   ))
                 }
@@ -131,7 +131,7 @@ const co2Map = JSON.stringify(
               <select
                 id="days"
                 class="mt-1.5 w-full border border-forest-300 bg-cream-50 px-3.5 py-2.5 text-forest-900 outline-none transition focus:border-forest-600 focus:ring-2 focus:ring-forest-600/20"
-                style="border-radius: var(--radius-sharp)"
+                style="border-radius: var(--radius-control)"
               >
                 <option value="7">7 วัน — เปิดทุกวัน</option>
                 <option value="6">6 วัน</option>
@@ -152,9 +152,9 @@ const co2Map = JSON.stringify(
             </p>
 
             <p class="mt-6 text-sm text-forest-700">คาร์บอนฟุตพริ้นต์จากหลอดตลอดปี</p>
-            <p class="tabular index-num mt-1 text-5xl text-forest-900">
-              <span data-out="kg">—</span>
-              <span class="ml-1.5 font-sans text-lg font-medium text-cane-600">กก. CO₂e</span>
+            <p class="tabular index-num mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-2 text-3xl text-forest-900 sm:text-5xl">
+              <span class="min-w-0 break-all" data-out="kg">—</span>
+              <span class="font-sans text-base font-medium text-cane-600 sm:text-lg">กก. CO₂e</span>
             </p>
 
             <div class="mt-8 grid gap-5 sm:grid-cols-2">
@@ -187,7 +187,7 @@ const co2Map = JSON.stringify(
     </section>
 
     <!-- เอาไปใช้ยังไง — ลดแรงเสียดทานของฝ่ายจัดซื้อ -->
-    <section class="mx-auto max-w-3xl px-4 py-16" aria-labelledby="use">
+    <section class="mx-auto max-w-3xl px-5 sm:px-6 section-space-sm" aria-labelledby="use">
       <p class="eyebrow">นำไปใช้</p>
       <h2 id="use" class="mt-3 text-2xl font-medium text-forest-900">
         นำตัวเลขนี้ไปใช้ในรายงานอย่างไร
@@ -225,7 +225,7 @@ const co2Map = JSON.stringify(
 
     <!-- upcycle: เรื่องเล่าที่ทำให้ตัวเลขมีความหมาย -->
     <section class="border-t border-forest-200/60 bg-cream-100" aria-labelledby="upcycle">
-      <div class="mx-auto max-w-3xl px-4 py-16">
+      <div class="mx-auto max-w-3xl px-5 sm:px-6 section-space-sm">
         <p class="eyebrow">ที่มาของวัสดุ</p>
         <h2 id="upcycle" class="mt-3 text-2xl font-medium text-forest-900">
           ชานอ้อยคือของเหลือ ไม่ใช่พืชที่ปลูกเพื่อทำหลอด
@@ -254,7 +254,7 @@ const co2Map = JSON.stringify(
 
   <CtaBand
     heading="ขอเอกสารรับรองสำหรับฝ่ายจัดซื้อ"
-    sub="ส่งไฟล์ใบรับรอง ISO 14067 และ TUV Home Compost ให้แนบรายงานได้ พร้อมตัวอย่างสินค้าฟรี"
+    sub="ขอใบรับรองสำหรับแนบรายงานทาง LINE พร้อมแจ้งขนาดสินค้าและเอกสารที่ต้องการ"
   />
 </Base>
 
@@ -282,7 +282,7 @@ const co2Map = JSON.stringify(
 
     function update() {
       /// กันค่าติดลบและค่าว่าง — ผู้ใช้ลบตัวเลขทิ้งกลางคันได้เสมอ
-      const perDay = Math.max(0, Number(cups.value) || 0);
+      const perDay = Math.min(Number(cups.max), Math.max(0, Math.floor(Number(cups.value) || 0)));
       const perWeek = Number(days.value);
       const gramsPerStraw = co2[size.value] ?? 0;
 

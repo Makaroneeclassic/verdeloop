@@ -5,13 +5,15 @@
 /// ไม่ใช่การจัดหน้าใหม่ที่ความกว้างมือถือ ซึ่งทำให้อ่านผลผิดว่าเว็บพัง ทั้งที่จริงแค่ภาพถูกครอป
 /// Emulation.setDeviceMetricsOverride เป็นตัวเดียวที่บังคับความกว้าง layout ได้จริง
 ///
-/// ใช้: node scripts/shot.mjs <baseUrl> <outDir> <width> <path...>
+/// ใช้: node scripts/shot.mjs <baseUrl> <outDir> <width> <path...> [--check]
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const [base, outDir, widthArg, ...paths] = process.argv.slice(2);
+const [base, outDir, widthArg, ...args] = process.argv.slice(2);
+const check = args.includes('--check');
+const paths = args.filter((arg) => arg !== '--check');
 const width = Number(widthArg) || 390;
 mkdirSync(outDir, { recursive: true });
 
@@ -21,8 +23,8 @@ const chrome = spawn(CHROME, [
   `--remote-debugging-port=${port}`,
   '--disable-gpu',
   '--no-first-run',
-  '--user-data-dir=/tmp/cdp-profile-' + port,
-]);
+  '--user-data-dir=' + mkdtempSync('/private/tmp/verdeloop-chrome-'),
+], { stdio: 'ignore' });
 
 /// รอให้ Chrome เปิดพอร์ต debug ก่อน ไม่งั้น fetch จะโดน ECONNREFUSED
 async function waitForChrome() {
@@ -41,14 +43,18 @@ function send(ws, method, params = {}, sessionId) {
   const id = ++msgId;
   ws.send(JSON.stringify({ id, method, params, sessionId }));
   return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      ws.removeEventListener('message', onMsg);
+      reject(new Error('timeout: ' + method));
+    }, 30000);
     const onMsg = (ev) => {
       const m = JSON.parse(ev.data);
       if (m.id !== id) return;
+      clearTimeout(timeout);
       ws.removeEventListener('message', onMsg);
       m.error ? reject(new Error(method + ': ' + m.error.message)) : resolve(m.result);
     };
     ws.addEventListener('message', onMsg);
-    setTimeout(() => reject(new Error('timeout: ' + method)), 30000);
   });
 }
 
@@ -65,16 +71,31 @@ await S('Runtime.enable');
 
 const report = [];
 for (const path of paths) {
-  /// mobile:true + deviceScaleFactor 2 = จำลองจอมือถือจริง ไม่ใช่หน้าต่างเดสก์ท็อปแคบ ๆ
+  /// จอเล็กจำลองมือถือ จอกว้างใช้ desktop viewport จริง
   await S('Emulation.setDeviceMetricsOverride', {
     width,
     height: 844,
-    deviceScaleFactor: 2,
-    mobile: true,
+    deviceScaleFactor: 1,
+    mobile: width < 768,
   });
 
   await S('Page.navigate', { url: base + path });
-  await sleep(1800); // รอฟอนต์ไทยจาก Google Fonts โหลดเสร็จ ไม่งั้นวัดความสูงผิด
+  await sleep(700);
+  // โหลด lazy images ก่อนถ่ายภาพเต็มหน้า มิฉะนั้นภาพนอก viewport จะเป็นช่องว่าง
+  await S('Runtime.evaluate', {
+    expression: `(async () => {
+      const style = document.createElement('style');
+      style.textContent = 'astro-dev-toolbar { display: none !important; }';
+      document.head.append(style);
+      [...document.images].forEach(img => img.loading = 'eager');
+      await Promise.race([
+        Promise.all([document.fonts.ready, ...[...document.images].map(img => img.decode().catch(() => {}))]),
+        new Promise(r => setTimeout(r, 10000)),
+      ]);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    })()`,
+    awaitPromise: true,
+  });
 
   /// วัดการล้นแนวนอน และหา element ต้นเหตุ (ตัวที่ล้นแต่แม่ไม่ล้น)
   const { result } = await S('Runtime.evaluate', {
@@ -95,22 +116,97 @@ for (const path of paths) {
             ' right=' + Math.round(r.right) + ' class="' + (el.getAttribute('class')||'').slice(0,80) + '"');
         });
       }
-      return JSON.stringify({ over, W, sw: de.scrollWidth, h: de.scrollHeight, bad });
+      return JSON.stringify({ over, W, sw: de.scrollWidth, h: de.scrollHeight, bad,
+        title: document.title,
+        brokenImages: [...document.images].filter(im => !im.naturalWidth).map(im => im.getAttribute('src')) });
     })()`,
     returnByValue: true,
   });
   const info = JSON.parse(result.value);
+  if (check) {
+    const checked = await S('Runtime.evaluate', {
+      expression: `(() => {
+        const checks = {};
+        const menu = document.querySelector('[data-mobile-menu]');
+        const summary = menu?.querySelector('summary');
+        if (summary?.getBoundingClientRect().width) {
+          summary.click();
+          const nav = menu.querySelector('nav');
+          const rect = nav.getBoundingClientRect();
+          checks.menuFits = menu.open && rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;
+          document.querySelector('main').click();
+          checks.outsideCloses = !menu.open;
+          summary.click();
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+          checks.escapeCloses = !menu.open && document.activeElement === summary;
+          summary.blur();
+        }
+        const faq = document.querySelector('main details');
+        if (faq) {
+          faq.querySelector('summary').click();
+          checks.faqOpens = faq.open && faq.querySelector('p').getBoundingClientRect().height > 0;
+          faq.querySelector('summary').click();
+          checks.faqCloses = !faq.open;
+        }
+        const form = document.querySelector('#form');
+        if (form) {
+          checks.formValidation = !form.checkValidity();
+          form.elements.name.value = 'ทดสอบการจัดวาง';
+          form.elements.phone.value = '0983539369';
+          form.elements.consent.checked = true;
+          checks.formReady = form.checkValidity() && form.getAttribute('action') === '/api/lead';
+          form.reset();
+        }
+        const calc = document.querySelector('[data-calc]');
+        if (calc) {
+          const cups = calc.querySelector('#cups');
+          const size = calc.querySelector('#size');
+          const original = cups.value;
+          const originalSize = size.value;
+          size.value = '12';
+          cups.value = '1000000';
+          cups.dispatchEvent(new Event('input', { bubbles: true }));
+          checks.calculatorLargeValue = document.documentElement.scrollWidth <= innerWidth;
+          const number = calc.querySelector('[data-out="kg"]');
+          checks.calculatorUpdates = Number(number.textContent.replaceAll(',', '')) === 3527160;
+          cups.value = '-1';
+          cups.dispatchEvent(new Event('input', { bubbles: true }));
+          checks.calculatorNegative = number.textContent === '0';
+          cups.value = original;
+          size.value = originalSize;
+          cups.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const tables = [...document.querySelectorAll('.table-scroll')];
+        checks.tablesContained = tables.every(el => {
+          if (el.scrollWidth <= el.clientWidth) return true;
+          el.scrollLeft = el.scrollWidth;
+          const ok = el.scrollLeft > 0 && document.documentElement.scrollWidth <= innerWidth;
+          el.scrollLeft = 0;
+          return ok;
+        });
+        return JSON.stringify(checks);
+      })()`,
+      returnByValue: true,
+    });
+    info.checks = JSON.parse(checked.result.value);
+  }
   report.push({ path, ...info });
 
   const name = (path.replace(/\//g, '_') || 'home').replace(/^_|_$/g, '') || 'home';
   const { data } = await S('Page.captureScreenshot', {
     format: 'png',
     captureBeyondViewport: true,
-    clip: { x: 0, y: 0, width, height: Math.min(info.h, 6000), scale: 1 },
+    clip: { x: 0, y: 0, width, height: info.h, scale: 1 },
   });
   writeFileSync(`${outDir}/${name}.png`, Buffer.from(data, 'base64'));
+  const top = await S('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  writeFileSync(`${outDir}/${name}-viewport.png`, Buffer.from(top.data, 'base64'));
 }
 
 console.log(JSON.stringify(report, null, 1));
+writeFileSync(`${outDir}/report.json`, JSON.stringify(report, null, 2));
 ws.close();
 chrome.kill();
+if (report.some(r => r.over > 0 || r.brokenImages.length || Object.values(r.checks ?? {}).some(v => !v))) {
+  process.exitCode = 1;
+}

@@ -1,0 +1,7 @@
+---
+import { CONTACT } from '../data/products';
+interface Props { placement?: string; }
+const { placement = 'footer' } = Astro.props;
+const href = '/line/?' + new URLSearchParams({placement, from: Astro.url.pathname});
+---
+<a href={href} target="_blank" rel="noopener noreferrer" data-track="line" data-placement={placement} class="line-button"><img src="/img/line-brand.png" width="40" height="40" alt="" aria-hidden="true" class="line-button-icon" /><span><slot>LINE {CONTACT.lineId}</slot></span></a>
