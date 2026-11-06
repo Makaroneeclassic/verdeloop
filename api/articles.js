@@ -24,7 +24,18 @@ export default async function handler(req,res){
   }
   if(rawSlug){let slug;try{slug=articleSlug(decodeURIComponent(rawSlug));}catch{return notFound();}
    const [row]=await sql`SELECT slug,snapshot,published_at,updated_at FROM article_publications WHERE slug=${slug} AND published=true`;
-   if(!row)return notFound();return res.status(200).send(renderArticle(row));
+   if(!row)return notFound();
+   const wanted=Array.isArray(row.snapshot?.related)?row.snapshot.related.filter(x=>typeof x==='string'&&x).slice(0,6):[];
+   let related=[];
+   if(wanted.length&&wanted.some(x=>x!==slug)){
+    const picked=await sql`SELECT slug,snapshot FROM article_publications WHERE published=true AND slug IN (SELECT jsonb_array_elements_text(${JSON.stringify(wanted)}::jsonb))`;
+    related=picked.filter(r=>r.slug!==slug);
+   }
+   if(!related.length){
+    const latest=await sql`SELECT slug,snapshot FROM article_publications WHERE published=true ORDER BY published_at DESC,draft_id LIMIT 4`;
+    related=latest.filter(r=>r.slug!==slug).slice(0,3);
+   }
+   return res.status(200).send(renderArticle(row,related));
   }
   const page=Math.min(10000,Math.max(1,Number.parseInt(q.get('page')||'1',10)||1));
   const rows=await sql`SELECT slug,snapshot,published_at FROM article_publications WHERE published=true ORDER BY published_at DESC,draft_id LIMIT 13 OFFSET ${(page-1)*12}`;
