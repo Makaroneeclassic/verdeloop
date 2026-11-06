@@ -22,7 +22,7 @@ import { maintenance } from '../lib/maintenance.js';
 import { makeBackup, encryptBackup } from '../lib/backup.js';
 import { uploadDocument, removeDocument } from '../lib/documents.js';
 
-const WRITER_ACTIONS = ['writer_settings','writer_check','writer_new','writer_save','writer_generate','writer_upload','writer_publish','writer_unpublish'];
+const WRITER_ACTIONS = ['writer_settings','writer_check','writer_new','writer_save','writer_generate','writer_upload','writer_faq','writer_publish','writer_unpublish'];
 const PAGE_SIZE = 100;
 const DB_TIMEOUT_MS = 8000;
 

@@ -237,8 +237,21 @@
    addFAQRow({q,a:''});have.add(q);added++;
   }
   if(added)markDirty();
-  status(added?'เพิ่ม '+added+' คำถามจาก SERP Spy แล้ว กรอกคำตอบให้ครบก่อนเผยแพร่':'คำถามจาก SERP Spy อยู่ในรายการแล้วทั้งหมด');
+  status(added?'เพิ่ม '+added+' คำถามจาก SERP Spy แล้ว กด "ให้ AI เขียนคำตอบ" หรือกรอกเองก่อนเผยแพร่':'คำถามจาก SERP Spy อยู่ในรายการแล้วทั้งหมด');
  };
+ $('faq-ai').onclick=()=>run(async()=>{
+  if(!draft)throw Error('สร้างหรือเลือกฉบับร่างก่อน');
+  const openRows=[...$('faq-list').querySelectorAll('.faq-row')].filter(row=>row.querySelector('input').value.trim()&&!row.querySelector('textarea').value.trim());
+  if(!openRows.length)throw Error('ไม่มีคำถามที่ยังว่างคำตอบ — AI เขียนเฉพาะช่องคำตอบที่ว่าง จะเขียนทับคำตอบเดิมไม่ได้');
+  const questions=openRows.map(row=>row.querySelector('input').value.trim());
+  status('กำลังบันทึกและให้ AI เขียนคำตอบ '+questions.length+' ข้อ…');
+  await save();
+  const r=await api('writer_faq',{id:draft.id,questions});
+  let filled=0;
+  r.faq.forEach((f,i)=>{if(openRows[i]&&f.a){openRows[i].querySelector('textarea').value=f.a;filled++;}});
+  if(filled)markDirty();
+  status(filled?('AI เขียนคำตอบให้ '+filled+'/'+questions.length+' ข้อแล้ว ตรวจความถูกต้องก่อนบันทึก'):'AI ยังตอบข้อใดไม่ได้จากเนื้อหาปัจจุบัน ลองเพิ่มข้อมูลในบทความก่อน',filled===0);
+ });
 
  // ---- บทความที่เกี่ยวข้อง ----
  let relatedChecked=new Set();
